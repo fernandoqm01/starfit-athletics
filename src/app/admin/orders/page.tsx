@@ -21,15 +21,16 @@ type Order = {
   customer_address: string
   customer_city: string
   payment_method: string
+  sinpe_referencia: string | null
   total: number
   items: OrderItem[]
   status: string
 }
 
-const STATUS_OPTIONS = ["pendiente", "confirmado", "enviado", "entregado", "cancelado"]
+const STATUS_OPTIONS = ["pendiente_pago", "confirmado", "enviado", "entregado", "cancelado"]
 
 const STATUS_COLORS: Record<string, string> = {
-  pendiente: "bg-yellow-100 text-yellow-700",
+  pendiente_pago: "bg-yellow-100 text-yellow-700",
   confirmado: "bg-blue-100 text-blue-700",
   enviado: "bg-purple-100 text-purple-700",
   entregado: "bg-green-100 text-green-700",
@@ -263,6 +264,11 @@ export default function OrdersPage() {
                   Metodo de pago
                 </label>
                 <p className="mt-1 capitalize font-medium">{selected.payment_method}</p>
+                {selected.sinpe_referencia && (
+                  <p className="mt-1 text-sm text-gray-600">
+                    Ref. SINPE: <span className="font-mono font-medium">{selected.sinpe_referencia}</span>
+                  </p>
+                )}
               </div>
 
               {/* Items */}

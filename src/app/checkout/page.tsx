@@ -18,7 +18,10 @@ export default function Checkout() {
     direccion: "",
     ciudad: "",
     metodo: "tarjeta",
+    sinpeReferencia: "",
   })
+
+  const [sinpeModal, setSinpeModal] = useState(false)
 
   const subtotal = cart.reduce(
     (acc, item) => acc + item.price * item.quantity,
@@ -33,6 +36,43 @@ export default function Checkout() {
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (formData.metodo === "sinpe" && !formData.sinpeReferencia) {
+      alert("Por favor ingrese el numero de comprobante SINPE")
+      return
+    }
+
+    if (formData.metodo === "tarjeta") {
+      // Stripe integration
+      try {
+        const res = await fetch("/api/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: cart.map((item) => ({
+              ...item,
+              customerName: formData.nombre,
+              customerEmail: formData.email,
+              customerPhone: formData.telefono,
+              customerAddress: formData.direccion,
+              customerCity: formData.ciudad,
+            })),
+            shipping,
+          }),
+        })
+
+        const data = await res.json()
+        if (data.url) {
+          window.location.href = data.url
+          return
+        }
+      } catch {
+        alert("Error al conectar con Stripe. Intente con otro metodo de pago.")
+        setLoading(false)
+        return
+      }
+    }
+
     setLoading(true)
 
     try {
@@ -57,14 +97,19 @@ export default function Checkout() {
         if (updateError) throw new Error("Error al actualizar inventario")
       }
 
-      // 2. Crear la orden
+      // 2. Obtener usuario actual
+      const { data: { user } } = await supabase.auth.getUser()
+
+      // 3. Crear la orden
       const order = {
+        user_id: user?.id ?? null,
         customer_name: formData.nombre,
         customer_email: formData.email,
         customer_phone: formData.telefono,
         customer_address: formData.direccion,
         customer_city: formData.ciudad,
         payment_method: formData.metodo,
+        sinpe_referencia: formData.sinpeReferencia || null,
         total,
         items: cart.map((item) => ({
           product_id: item.id,
@@ -73,12 +118,30 @@ export default function Checkout() {
           price: item.price,
           size: item.size || null,
         })),
-        status: "pendiente",
+        status: "pendiente_pago",
       }
 
       const { error } = await supabase.from("orders").insert([order])
 
       if (error) throw error
+
+      // Enviar email de confirmacion (se envia con datos basicos, el ID se asigna en BD)
+      fetch("/api/notify-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: 0,
+          customer_name: formData.nombre,
+          customer_email: formData.email,
+          total,
+          items: cart.map((item) => ({
+            product_name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            size: item.size || null,
+          })),
+        }),
+      })
 
       clearCart()
       setStep(3)
@@ -230,6 +293,7 @@ export default function Checkout() {
                 onChange={handleChange}
               />
               <span className="font-medium">Tarjeta de credito</span>
+              <span className="ml-auto text-xs text-gray-400">Stripe</span>
             </label>
             <label className="flex items-center gap-3 border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition">
               <input
@@ -252,6 +316,27 @@ export default function Checkout() {
               <span className="font-medium">Transferencia bancaria</span>
             </label>
           </div>
+
+          {/* SINPE Info */}
+          {formData.metodo === "sinpe" && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
+              <p className="font-semibold text-sm mb-1">Pago con SINPE Movil</p>
+              <p className="text-sm text-gray-600 mb-2">
+                Envie el monto al numero: <span className="font-bold">+506 8888-8888</span>
+              </p>
+              <p className="text-xs text-gray-500 mb-4">
+                Una vez realizado el pago, ingrese el numero de comprobante para confirmar la orden.
+              </p>
+              <input
+                name="sinpeReferencia"
+                placeholder="Numero de comprobante SINPE"
+                value={formData.sinpeReferencia}
+                onChange={handleChange}
+                required={formData.metodo === "sinpe"}
+                className="w-full border border-yellow-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-white"
+              />
+            </div>
+          )}
 
           <div className="flex gap-3 mb-6">
             <button
@@ -306,12 +391,20 @@ export default function Checkout() {
           <p className="text-gray-600 mb-6">
             Te hemos enviado un email con los detalles de tu orden.
           </p>
-          <button
-            onClick={() => router.push("/products")}
-            className="bg-black text-white px-8 py-3 rounded-xl font-semibold hover:bg-gray-800 transition"
-          >
-            Seguir comprando
-          </button>
+          <div className="flex gap-4 justify-center">
+            <button
+              onClick={() => router.push("/products")}
+              className="border border-black px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition"
+            >
+              Seguir comprando
+            </button>
+            <button
+              onClick={() => router.push("/account")}
+              className="bg-black text-white px-8 py-3 rounded-xl font-semibold hover:bg-gray-800 transition"
+            >
+              Ver mis pedidos
+            </button>
+          </div>
         </div>
       )}
     </div>

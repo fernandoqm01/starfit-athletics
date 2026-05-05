@@ -21,6 +21,7 @@ type CartContextType = {
   decreaseQuantity: (id: number, size: string) => void
   notification: string | null
   clearCart: () => void
+  totalItems: number
 }
 
 const CartContext = createContext<CartContextType | null>(null)
@@ -98,6 +99,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setNotification("Carrito vaciado")
   }
 
+  const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0)
+
   return (
     <CartContext.Provider
       value={{
@@ -107,6 +110,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         decreaseQuantity,
         notification,
         clearCart,
+        totalItems,
       }}
     >
       {children}

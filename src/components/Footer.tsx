@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 
 export default function Footer() {
   return (
@@ -6,7 +7,13 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-6 py-12 grid md:grid-cols-4 gap-8">
         {/* Brand */}
         <div>
-          <h3 className="font-bold text-xl mb-4">StarFit</h3>
+          <Image
+            src="/logo.svg"
+            alt="StarFit"
+            width={120}
+            height={40}
+            className="mb-4"
+          />
           <p className="text-gray-400 text-sm">
             Equipamiento deportivo para quienes no se rinden.
           </p>
@@ -17,22 +24,22 @@ export default function Footer() {
           <h4 className="font-semibold mb-4">Tienda</h4>
           <ul className="space-y-2 text-sm text-gray-400">
             <li>
-              <Link href="/products" className="hover:text-white transition">
+              <Link href="/products" className="hover:text-yellow-500 transition">
                 Todos los productos
               </Link>
             </li>
             <li>
-              <Link href="/products" className="hover:text-white transition">
+              <Link href="/products" className="hover:text-yellow-500 transition">
                 Ropa
               </Link>
             </li>
             <li>
-              <Link href="/products" className="hover:text-white transition">
+              <Link href="/products" className="hover:text-yellow-500 transition">
                 Calzado
               </Link>
             </li>
             <li>
-              <Link href="/products" className="hover:text-white transition">
+              <Link href="/products" className="hover:text-yellow-500 transition">
                 Accesorios
               </Link>
             </li>
@@ -44,17 +51,17 @@ export default function Footer() {
           <h4 className="font-semibold mb-4">Informacion</h4>
           <ul className="space-y-2 text-sm text-gray-400">
             <li>
-              <Link href="/about" className="hover:text-white transition">
+              <Link href="/about" className="hover:text-yellow-500 transition">
                 Sobre nosotros
               </Link>
             </li>
             <li>
-              <Link href="/contact" className="hover:text-white transition">
+              <Link href="/contact" className="hover:text-yellow-500 transition">
                 Contacto
               </Link>
             </li>
             <li>
-              <Link href="/terms" className="hover:text-white transition">
+              <Link href="/terms" className="hover:text-yellow-500 transition">
                 Terminos y condiciones
               </Link>
             </li>
@@ -67,7 +74,7 @@ export default function Footer() {
           <div className="flex gap-4">
             <a
               href="#"
-              className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition"
+              className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-yellow-500/20 hover:text-yellow-500 transition text-gray-400"
               aria-label="Instagram"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -76,7 +83,7 @@ export default function Footer() {
             </a>
             <a
               href="#"
-              className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition"
+              className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-yellow-500/20 hover:text-yellow-500 transition text-gray-400"
               aria-label="Facebook"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -85,7 +92,7 @@ export default function Footer() {
             </a>
             <a
               href="#"
-              className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition"
+              className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-yellow-500/20 hover:text-yellow-500 transition text-gray-400"
               aria-label="TikTok"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -97,7 +104,7 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-gray-800 py-6 text-center text-sm text-gray-500">
-        <p>2024 StarFit. Todos los derechos reservados.</p>
+        <p>2026 StarFit. Todos los derechos reservados.</p>
       </div>
     </footer>
   )

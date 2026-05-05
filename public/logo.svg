@@ -1,4 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="120" height="40" viewBox="0 0 120 40">
-  <text x="0" y="30" font-family="Arial, sans-serif" font-weight="bold" font-size="28" fill="#000">Star</text>
-  <text x="52" y="30" font-family="Arial, sans-serif" font-weight="bold" font-size="28" fill="#2563eb">Fit</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047" />
+      <stop offset="50%" stop-color="#D4AF37" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+  </defs>
+  <!-- Star Icon -->
+  <path d="M12 5L14.5 13H22L16 17.5L18.5 25.5L12 21L5.5 25.5L8 17.5L2 13H9.5L12 5Z" fill="url(#gold)" />
+  <text x="38" y="28" fill="#FFFFFF" font-family="system-ui, sans-serif" font-weight="900" font-size="24" letter-spacing="2">STAR</text>
+  <text x="105" y="28" fill="url(#gold)" font-family="system-ui, sans-serif" font-weight="900" font-size="24" letter-spacing="2">FIT</text>
 </svg>

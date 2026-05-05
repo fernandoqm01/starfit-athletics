@@ -3,6 +3,7 @@ import { Inter } from "next/font/google"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import ScrollToTop from "@/components/ScrollToTop"
+import CookieBanner from "@/components/CookieBanner"
 import { CartProvider } from "@/context/CartContext"
 import type { Metadata } from "next"
 
@@ -16,10 +17,8 @@ export const metadata: Metadata = {
   description: "Equipamiento deportivo disenado para quienes no se rinden. Ropa, calzado, accesorios, equipamiento y suplementos.",
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "32x32" },
-      { url: "/icon.png", type: "image/png", sizes: "192x192" },
+      { url: "/logo.svg", type: "image/svg+xml" },
     ],
-    apple: { url: "/icon.png", sizes: "192x192" },
   },
   openGraph: {
     title: "StarFit - Equipamiento Deportivo",
@@ -27,14 +26,6 @@ export const metadata: Metadata = {
     type: "website",
     locale: "es_CR",
     siteName: "StarFit",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "StarFit - Equipamiento Deportivo de Alto Rendimiento",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -55,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Navbar />
           <div className="pt-16">{children}</div>
           <ScrollToTop />
+          <CookieBanner />
           <Footer />
         </CartProvider>
       </body>

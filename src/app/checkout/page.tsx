@@ -36,6 +36,28 @@ export default function Checkout() {
     setLoading(true)
 
     try {
+      // 1. Verificar y descontar stock
+      for (const item of cart) {
+        const { data: product, error: fetchError } = await supabase
+          .from("products")
+          .select("stock")
+          .eq("id", item.id)
+          .single()
+
+        if (fetchError) throw new Error("Error al verificar inventario")
+        if (!product || product.stock < item.quantity) {
+          throw new Error(`Stock insuficiente para ${item.name}`)
+        }
+
+        const { error: updateError } = await supabase
+          .from("products")
+          .update({ stock: product.stock - item.quantity })
+          .eq("id", item.id)
+
+        if (updateError) throw new Error("Error al actualizar inventario")
+      }
+
+      // 2. Crear la orden
       const order = {
         customer_name: formData.nombre,
         customer_email: formData.email,

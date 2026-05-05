@@ -17,11 +17,9 @@ export default function Checkout() {
     telefono: "",
     direccion: "",
     ciudad: "",
-    metodo: "tarjeta",
+    metodo: "sinpe",
     sinpeReferencia: "",
   })
-
-  const [sinpeModal, setSinpeModal] = useState(false)
 
   const subtotal = cart.reduce(
     (acc, item) => acc + item.price * item.quantity,
@@ -42,41 +40,9 @@ export default function Checkout() {
       return
     }
 
-    if (formData.metodo === "tarjeta") {
-      // Stripe integration
-      try {
-        const res = await fetch("/api/checkout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            items: cart.map((item) => ({
-              ...item,
-              customerName: formData.nombre,
-              customerEmail: formData.email,
-              customerPhone: formData.telefono,
-              customerAddress: formData.direccion,
-              customerCity: formData.ciudad,
-            })),
-            shipping,
-          }),
-        })
-
-        const data = await res.json()
-        if (data.url) {
-          window.location.href = data.url
-          return
-        }
-      } catch {
-        alert("Error al conectar con Stripe. Intente con otro metodo de pago.")
-        setLoading(false)
-        return
-      }
-    }
-
     setLoading(true)
 
     try {
-      // 1. Verificar y descontar stock
       for (const item of cart) {
         const { data: product, error: fetchError } = await supabase
           .from("products")
@@ -97,10 +63,8 @@ export default function Checkout() {
         if (updateError) throw new Error("Error al actualizar inventario")
       }
 
-      // 2. Obtener usuario actual
       const { data: { user } } = await supabase.auth.getUser()
 
-      // 3. Crear la orden
       const order = {
         user_id: user?.id ?? null,
         customer_name: formData.nombre,
@@ -124,24 +88,6 @@ export default function Checkout() {
       const { error } = await supabase.from("orders").insert([order])
 
       if (error) throw error
-
-      // Enviar email de confirmacion (se envia con datos basicos, el ID se asigna en BD)
-      fetch("/api/notify-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: 0,
-          customer_name: formData.nombre,
-          customer_email: formData.email,
-          total,
-          items: cart.map((item) => ({
-            product_name: item.name,
-            quantity: item.quantity,
-            price: item.price,
-            size: item.size || null,
-          })),
-        }),
-      })
 
       clearCart()
       setStep(3)
@@ -171,7 +117,6 @@ export default function Checkout() {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      {/* Progress */}
       <div className="flex items-center justify-between mb-8">
         {[1, 2, 3].map((s) => (
           <div key={s} className="flex items-center flex-1">
@@ -193,7 +138,6 @@ export default function Checkout() {
         ))}
       </div>
 
-      {/* Step 1: Info */}
       {step === 1 && (
         <div>
           <h1 className="text-2xl font-bold mb-6">Informacion de envio</h1>
@@ -255,12 +199,10 @@ export default function Checkout() {
         </div>
       )}
 
-      {/* Step 2: Payment */}
       {step === 2 && (
         <form onSubmit={handlePlaceOrder}>
           <h1 className="text-2xl font-bold mb-6">Metodo de pago</h1>
 
-          {/* Items summary */}
           <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-2">
             {cart.map((item) => (
               <div key={`${item.id}-${item.size}`} className="flex justify-between text-sm">
@@ -288,17 +230,6 @@ export default function Checkout() {
               <input
                 type="radio"
                 name="metodo"
-                value="tarjeta"
-                checked={formData.metodo === "tarjeta"}
-                onChange={handleChange}
-              />
-              <span className="font-medium">Tarjeta de credito</span>
-              <span className="ml-auto text-xs text-gray-400">Stripe</span>
-            </label>
-            <label className="flex items-center gap-3 border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition">
-              <input
-                type="radio"
-                name="metodo"
                 value="sinpe"
                 checked={formData.metodo === "sinpe"}
                 onChange={handleChange}
@@ -317,7 +248,6 @@ export default function Checkout() {
             </label>
           </div>
 
-          {/* SINPE Info */}
           {formData.metodo === "sinpe" && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
               <p className="font-semibold text-sm mb-1">Pago con SINPE Movil</p>
@@ -332,9 +262,20 @@ export default function Checkout() {
                 placeholder="Numero de comprobante SINPE"
                 value={formData.sinpeReferencia}
                 onChange={handleChange}
-                required={formData.metodo === "sinpe"}
+                required
                 className="w-full border border-yellow-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-white"
               />
+            </div>
+          )}
+
+          {formData.metodo === "transferencia" && (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+              <p className="font-semibold text-sm mb-1">Datos para transferencia</p>
+              <p className="text-sm text-gray-600">Banco: <span className="font-bold">BNCR</span></p>
+              <p className="text-sm text-gray-600">Cuenta: <span className="font-bold">001-123456-7</span></p>
+              <p className="text-xs text-gray-500 mt-2">
+                Envie el comprobante a nuestro WhatsApp una vez realizada la transferencia.
+              </p>
             </div>
           )}
 
@@ -355,7 +296,6 @@ export default function Checkout() {
             </button>
           </div>
 
-          {/* Trust badges */}
           <div className="border-t pt-6 grid grid-cols-3 gap-4 text-center text-xs text-gray-500">
             <div className="p-3">
               <svg className="w-6 h-6 mx-auto mb-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -379,7 +319,6 @@ export default function Checkout() {
         </form>
       )}
 
-      {/* Step 3: Success */}
       {step === 3 && (
         <div className="text-center py-12 animate-slide-in-up">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -389,7 +328,7 @@ export default function Checkout() {
           </div>
           <h1 className="text-3xl font-bold mb-4">Orden confirmada!</h1>
           <p className="text-gray-600 mb-6">
-            Te hemos enviado un email con los detalles de tu orden.
+            Revisa tu email para los detalles de la orden.
           </p>
           <div className="flex gap-4 justify-center">
             <button

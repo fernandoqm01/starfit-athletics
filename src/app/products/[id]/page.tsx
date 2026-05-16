@@ -7,6 +7,13 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCart } from "@/context/CartContext"
 
+type ProductImage = {
+  id: number
+  url: string
+  alt: string | null
+  sort_order: number
+}
+
 type Product = {
   id: number
   name: string
@@ -15,9 +22,18 @@ type Product = {
   description?: string
   category: string | null
   stock: number | null
+  is_dropship: boolean
+  supplier_name: string | null
+  supplier_url: string | null
+  est_delivery: string | null
+  brand: string | null
+  specifications: { key: string; value: string }[] | null
+  features: string[] | null
 }
 
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL"]
+
+const TABS = ["Descripcion", "Caracteristicas", "Especificaciones", "Envio"]
 
 export default function ProductDetail({
   params,
@@ -31,6 +47,15 @@ export default function ProductDetail({
   const [related, setRelated] = useState<Product[]>([])
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [sizeError, setSizeError] = useState(false)
+  const [images, setImages] = useState<ProductImage[]>([])
+  const [selectedImage, setSelectedImage] = useState(0)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState(0)
+
+  const allImages = [
+    ...(product?.image ? [{ id: 0, url: product.image, alt: product.name, sort_order: 0 }] : []),
+    ...images,
+  ]
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -44,6 +69,14 @@ export default function ProductDetail({
         console.error(error)
       } else {
         setProduct(data)
+
+        const { data: productImages } = await supabase
+          .from("product_images")
+          .select("*")
+          .eq("product_id", id)
+          .order("sort_order", { ascending: true })
+
+        setImages((productImages || []) as ProductImage[])
 
         if (data?.category) {
           const { data: relatedData } = await supabase
@@ -62,7 +95,7 @@ export default function ProductDetail({
 
   const handleAddToCart = () => {
     if (!product) return
-    if (product.stock === 0) return
+    if ((product.stock ?? 0) === 0) return
 
     if (!selectedSize) {
       setSizeError(true)
@@ -72,11 +105,21 @@ export default function ProductDetail({
     addToCart({ ...product, size: selectedSize })
   }
 
+  const handlePrevImage = () => {
+    setSelectedImage((prev) => (prev === 0 ? allImages.length - 1 : prev - 1))
+  }
+
+  const handleNextImage = () => {
+    setSelectedImage((prev) => (prev === allImages.length - 1 ? 0 : prev + 1))
+  }
+
   if (!product) return <p className="p-6">Cargando...</p>
 
   const stock = product.stock ?? 0
   const isLowStock = stock > 0 && stock <= 5
   const isOutOfStock = stock === 0
+  const specs = product.specifications as unknown as { key: string; value: string }[]
+  const features = product.features as unknown as string[]
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -110,31 +153,88 @@ export default function ProductDetail({
 
       {/* Product */}
       <div className="px-6 pb-16 grid md:grid-cols-2 gap-10">
-        {/* Imagen */}
-        <div className="relative">
-          {product.image && product.image.startsWith("http") ? (
-            <Image
-              src={product.image}
-              alt={product.name}
-              width={600}
-              height={400}
-              className="w-full h-[400px] object-cover rounded-xl bg-gray-100"
-            />
+        {/* Galeria */}
+        <div>
+          {allImages.length > 0 ? (
+            <>
+              <div className="relative">
+                {allImages[selectedImage]?.url?.startsWith("http") ? (
+                  <img
+                    src={allImages[selectedImage].url}
+                    alt={allImages[selectedImage].alt || product.name}
+                    className="w-full h-[400px] object-cover rounded-xl bg-gray-100 cursor-pointer"
+                    onClick={() => setLightboxOpen(true)}
+                  />
+                ) : (
+                  <div className="w-full h-[400px] bg-gray-100 rounded-xl flex items-center justify-center">
+                    <span className="text-gray-400">Sin imagen</span>
+                  </div>
+                )}
+
+                {product.category && (
+                  <span className="absolute top-4 left-4 bg-black text-white text-xs px-3 py-1 rounded-full uppercase tracking-wide">
+                    {product.category}
+                  </span>
+                )}
+
+                {allImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={handlePrevImage}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition shadow"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={handleNextImage}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition shadow"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* Thumbnails */}
+              {allImages.length > 1 && (
+                <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
+                  {allImages.map((img, i) => (
+                    <button
+                      key={img.id || i}
+                      onClick={() => setSelectedImage(i)}
+                      className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition ${
+                        i === selectedImage ? "border-black" : "border-transparent hover:border-gray-300"
+                      }`}
+                    >
+                      <img
+                        src={img.url}
+                        alt={img.alt || ""}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
           ) : (
             <div className="w-full h-[400px] bg-gray-100 rounded-xl flex items-center justify-center">
               <span className="text-gray-400">Sin imagen</span>
             </div>
           )}
-
-          {product.category && (
-            <span className="absolute top-4 left-4 bg-black text-white text-xs px-3 py-1 rounded-full uppercase tracking-wide">
-              {product.category}
-            </span>
-          )}
         </div>
 
         {/* Info */}
         <div>
+          {product.brand && (
+            <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">
+              {product.brand}
+            </p>
+          )}
+
           <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
 
           <p className="text-2xl font-semibold mb-4">{product.price.toLocaleString()}</p>
@@ -154,6 +254,34 @@ export default function ProductDetail({
             <div className="flex items-center gap-2 text-green-600 font-semibold mb-4">
               <div className="w-2 h-2 bg-green-600 rounded-full" />
               En stock
+            </div>
+          )}
+
+          {/* Dropshipping badge */}
+          {product.is_dropship && (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+              <div className="flex items-center gap-2 mb-1">
+                <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                </svg>
+                <span className="font-semibold text-sm text-blue-700">Envio directo del proveedor</span>
+              </div>
+              {product.supplier_name && (
+                <p className="text-xs text-blue-600">Proveedor: {product.supplier_name}</p>
+              )}
+              {product.est_delivery && (
+                <p className="text-xs text-blue-600">Tiempo estimado: {product.est_delivery}</p>
+              )}
+              {product.supplier_url && (
+                <a
+                  href={product.supplier_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-600 underline mt-1 inline-block"
+                >
+                  Ver producto en tienda original
+                </a>
+              )}
             </div>
           )}
 
@@ -184,10 +312,6 @@ export default function ProductDetail({
               </p>
             )}
           </div>
-
-          <p className="mb-6 text-gray-600">
-            {product.description || "Producto de alto rendimiento deportivo."}
-          </p>
 
           <button
             onClick={handleAddToCart}
@@ -224,6 +348,169 @@ export default function ProductDetail({
           </div>
         </div>
       </div>
+
+      {/* Tabs */}
+      <div className="border-t px-6 pt-8 pb-16">
+        <div className="flex border-b mb-8 overflow-x-auto">
+          {TABS.map((tab, i) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(i)}
+              className={`px-6 pb-3 text-sm font-medium transition whitespace-nowrap ${
+                activeTab === i
+                  ? "text-black border-b-2 border-black"
+                  : "text-gray-400 hover:text-gray-600"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        <div className="max-w-3xl">
+          {activeTab === 0 && (
+            <div className="prose prose-sm max-w-none">
+              <p className="text-gray-600 leading-relaxed">
+                {product.description || "No hay descripcion disponible para este producto."}
+              </p>
+            </div>
+          )}
+
+          {activeTab === 1 && (
+            <div>
+              {features && features.length > 0 ? (
+                <ul className="space-y-3">
+                  {features.map((f, i) => (
+                    <li key={i} className="flex items-start gap-3 text-gray-700">
+                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500">No hay caracteristicas listadas.</p>
+              )}
+            </div>
+          )}
+
+          {activeTab === 2 && (
+            <div>
+              {specs && specs.length > 0 ? (
+                <table className="w-full text-sm">
+                  <tbody>
+                    {specs.map((s, i) => (
+                      <tr key={i} className={i % 2 === 0 ? "bg-gray-50" : "bg-white"}>
+                        <td className="py-3 px-4 font-medium text-gray-600 w-1/3 border-b">
+                          {s.key}
+                        </td>
+                        <td className="py-3 px-4 text-gray-800 border-b">
+                          {s.value}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="text-gray-500">No hay especificaciones disponibles.</p>
+              )}
+            </div>
+          )}
+
+          {activeTab === 3 && (
+            <div className="space-y-4 text-gray-600 text-sm leading-relaxed">
+              {product.is_dropship ? (
+                <>
+                  <p>
+                    Este producto se envia directamente desde nuestro proveedor{" "}
+                    <strong>{product.supplier_name || "externo"}</strong>.
+                  </p>
+                  {product.est_delivery && (
+                    <p>
+                      Tiempo estimado de entrega: <strong>{product.est_delivery}</strong>.
+                    </p>
+                  )}
+                  <p>
+                    El numero de seguimiento se te enviara por correo electronico
+                    una vez que el producto sea despachado.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p>Envios a todo el pais.</p>
+                  <p>
+                    Tiempo de entrega estimado: <strong>3-7 dias habiles</strong>.
+                  </p>
+                  <p>
+                    Envio gratis en pedidos mayores a ₡50,000.
+                  </p>
+                  <p>
+                    El numero de seguimiento se te enviara por correo electronico.
+                  </p>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Lightbox */}
+      {lightboxOpen && (
+        <div
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          onClick={() => setLightboxOpen(false)}
+        >
+          <button
+            onClick={() => setLightboxOpen(false)}
+            className="absolute top-4 right-4 w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition"
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          <img
+            src={allImages[selectedImage]?.url}
+            alt={product.name}
+            className="max-w-full max-h-[85vh] object-contain rounded-lg"
+            onClick={(e) => e.stopPropagation()}
+          />
+
+          {allImages.length > 1 && (
+            <>
+              <button
+                onClick={(e) => { e.stopPropagation(); handlePrevImage() }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition"
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleNextImage() }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition"
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+
+              <div className="absolute bottom-4 flex gap-2">
+                {allImages.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={(e) => { e.stopPropagation(); setSelectedImage(i) }}
+                    className={`w-2.5 h-2.5 rounded-full transition ${
+                      i === selectedImage ? "bg-white" : "bg-white/40"
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Productos relacionados */}
       {related.length > 0 && (

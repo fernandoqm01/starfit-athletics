@@ -12,6 +12,7 @@ type Product = {
   image: string
   category: string | null
   stock: number | null
+  is_dropship: boolean
 }
 
 const CATEGORIES = [
@@ -31,6 +32,7 @@ export default function Products() {
   const [sort, setSort] = useState("default")
   const [maxPrice, setMaxPrice] = useState<number | null>(null)
   const [inStockOnly, setInStockOnly] = useState(false)
+  const [dropshipOnly, setDropshipOnly] = useState(false)
 
   const fetchProducts = useCallback(async () => {
     setLoading(true)
@@ -52,6 +54,7 @@ export default function Products() {
     .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
     .filter((p) => category === "Todos" || p.category === category)
     .filter((p) => (inStockOnly ? (p.stock ?? 0) > 0 : true))
+    .filter((p) => (dropshipOnly ? p.is_dropship : true))
     .filter((p) => (maxPrice ? p.price <= maxPrice : true))
     .sort((a, b) => {
       if (sort === "price-asc") return a.price - b.price
@@ -105,15 +108,27 @@ export default function Products() {
           className="w-28 border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-black"
         />
 
-        <label className="flex items-center gap-2 whitespace-nowrap cursor-pointer px-2">
-          <input
-            type="checkbox"
-            checked={inStockOnly}
-            onChange={(e) => setInStockOnly(e.target.checked)}
-            className="w-4 h-4"
-          />
-          <span className="text-sm">En stock</span>
-        </label>
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 whitespace-nowrap cursor-pointer">
+            <input
+              type="checkbox"
+              checked={inStockOnly}
+              onChange={(e) => setInStockOnly(e.target.checked)}
+              className="w-4 h-4"
+            />
+            <span className="text-sm">En stock</span>
+          </label>
+
+          <label className="flex items-center gap-2 whitespace-nowrap cursor-pointer">
+            <input
+              type="checkbox"
+              checked={dropshipOnly}
+              onChange={(e) => setDropshipOnly(e.target.checked)}
+              className="w-4 h-4"
+            />
+            <span className="text-sm">Dropshipping</span>
+          </label>
+        </div>
       </div>
 
       {/* Resultados */}
@@ -145,6 +160,7 @@ export default function Products() {
               setSort("default")
               setMaxPrice(null)
               setInStockOnly(false)
+              setDropshipOnly(false)
             }}
             className="bg-black text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition"
           >
@@ -175,6 +191,15 @@ export default function Products() {
                     ) : (
                       <div className="h-40 w-full bg-gray-100" />
                     )}
+
+                    {/* Badges */}
+                    <div className="absolute top-2 right-2 flex flex-col gap-1">
+                      {p.is_dropship && (
+                        <span className="bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded font-medium">
+                          Envio directo
+                        </span>
+                      )}
+                    </div>
 
                     {isOutOfStock && (
                       <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded font-medium">

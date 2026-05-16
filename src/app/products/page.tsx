@@ -168,8 +168,8 @@ export default function Products() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {filtered.map((p) => {
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          {filtered.map((p, idx) => {
             const stock = p.stock ?? 0
             const isLowStock = stock > 0 && stock <= 5
             const isOutOfStock = stock === 0
@@ -178,19 +178,33 @@ export default function Products() {
               <Link
                 href={`/products/${p.id}`}
                 key={p.id}
-                className={`group ${isOutOfStock ? "opacity-50 pointer-events-none" : ""}`}
+                className={`group ${isOutOfStock ? "opacity-50 pointer-events-none" : ""} animate-scale-in`}
+                style={{ animationDelay: `${idx * 50}ms`, animationFillMode: "both" }}
               >
-                <div className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden">
-                  <div className="relative">
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-gray-200 transition-all duration-300 overflow-hidden will-change-transform hover:-translate-y-1.5">
+                  <div className="relative overflow-hidden">
                     {p.image && p.image.startsWith("http") ? (
                       <img
                         src={p.image}
                         alt={p.name}
-                        className="h-40 w-full object-cover bg-gray-100 group-hover:opacity-90 transition"
+                        className="h-44 w-full object-cover bg-gray-100 transition-all duration-500 ease-out group-hover:scale-110"
                       />
                     ) : (
-                      <div className="h-40 w-full bg-gray-100" />
+                      <div className="h-44 w-full bg-gray-100" />
                     )}
+
+                    {/* Gradient overlay on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                    {/* View button overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                      <span className="bg-white text-black text-xs font-semibold px-4 py-2 rounded-full shadow-lg backdrop-blur-sm">
+                        Ver producto
+                      </span>
+                    </div>
+
+                    {/* Shimmer on hover */}
+                    <div className="absolute inset-0 card-shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
                     {/* Badges */}
                     <div className="absolute top-2 right-2 flex flex-col gap-1">
@@ -216,12 +230,16 @@ export default function Products() {
 
                   <div className="p-4">
                     {p.category && (
-                      <span className="text-xs text-gray-400 uppercase tracking-wide">
+                      <span className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">
                         {p.category}
                       </span>
                     )}
-                    <h3 className="font-medium text-sm truncate">{p.name}</h3>
-                    <p className="text-gray-500 text-sm font-semibold">{p.price.toLocaleString()}</p>
+                    <h3 className="font-semibold text-sm truncate mt-0.5 group-hover:text-black transition-colors">
+                      {p.name}
+                    </h3>
+                    <p className="text-gray-900 text-sm font-bold mt-1.5 group-hover:scale-105 inline-block transition-transform origin-left">
+                      ₡{p.price.toLocaleString()}
+                    </p>
                   </div>
                 </div>
               </Link>

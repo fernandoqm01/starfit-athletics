@@ -103,32 +103,43 @@ export default async function Home() {
           Los productos mas populares entre nuestros clientes
         </p>
 
-        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-5 max-w-6xl mx-auto">
           {products.length === 0 ? (
             <p className="col-span-full text-center text-gray-500">
               No hay productos disponibles
             </p>
           ) : (
-            products.map((item) => (
+            products.map((item, idx) => (
               <Link
                 href={`/products/${item.id}`}
                 key={item.id}
-                className="group"
+                className="group animate-scale-in"
+                style={{ animationDelay: `${idx * 80}ms`, animationFillMode: "both" }}
               >
-                <div className="bg-white rounded-2xl shadow p-4 hover:shadow-lg transition">
-                  {item.image && item.image.startsWith("http") ? (
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      width={300}
-                      height={160}
-                      className="h-40 w-full object-cover rounded-lg mb-4 bg-gray-100 group-hover:opacity-90 transition"
-                    />
-                  ) : (
-                    <div className="h-40 w-full bg-gray-100 rounded-lg mb-4" />
-                  )}
-                  <h3 className="font-semibold text-sm truncate">{item.name}</h3>
-                  <p className="text-gray-500 text-sm">{item.price.toLocaleString()}</p>
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-gray-200 transition-all duration-300 overflow-hidden will-change-transform hover:-translate-y-1.5">
+                  <div className="relative overflow-hidden">
+                    {item.image && item.image.startsWith("http") ? (
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        width={300}
+                        height={160}
+                        className="h-44 w-full object-cover rounded-none mb-0 bg-gray-100 transition-all duration-500 ease-out group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="h-44 w-full bg-gray-100" />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 card-shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-sm truncate group-hover:text-black transition-colors">
+                      {item.name}
+                    </h3>
+                    <p className="text-gray-900 text-sm font-bold mt-1.5 group-hover:scale-105 inline-block transition-transform origin-left">
+                      ₡{item.price.toLocaleString()}
+                    </p>
+                  </div>
                 </div>
               </Link>
             ))

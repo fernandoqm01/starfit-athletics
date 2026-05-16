@@ -59,6 +59,26 @@ body {
   }
 }
 
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 .animate-fade-in {
   animation: fade-in 0.3s ease-out;
 }
@@ -69,4 +89,18 @@ body {
 
 .animate-slide-in-up {
   animation: slide-in-up 0.4s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.35s ease-out;
+}
+
+.group:hover .group-hover\:scale-img {
+  transform: scale(1.08);
+}
+
+.card-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
 }

@@ -31,13 +31,20 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-40 transition-all ${
+      className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 ${
         scrolled
-          ? "bg-black/80 backdrop-blur-md shadow-lg"
-          : "bg-gradient-to-b from-black/50 to-transparent"
+          ? "bg-black/60 backdrop-blur-2xl shadow-[0_1px_30px_-10px_rgba(0,0,0,0.5)]"
+          : "bg-gradient-to-b from-black/40 to-transparent backdrop-blur-sm"
       }`}
     >
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      {/* Shine line */}
+      <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-yellow-500/30 to-transparent" />
+
+      {scrolled && (
+        <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      )}
+
+      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between relative z-10">
         <Link href="/" className="flex items-center gap-2">
           <Image
             src="/logo.svg"
@@ -49,36 +56,31 @@ export default function Navbar() {
           />
         </Link>
 
-        <div className="hidden md:flex items-center gap-7">
-          <Link
-            href="/products"
-            className="text-[13px] font-medium tracking-wide text-white/90 hover:text-yellow-500 transition"
-          >
-            Productos
-          </Link>
+        <div className="hidden md:flex items-center gap-1">
+          {[
+            { href: "/products", label: "Productos" },
+            { href: "/about", label: "Nosotros" },
+            { href: "/contact", label: "Contacto" },
+          ].map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className="px-4 py-2 text-[13px] font-medium tracking-wide text-white/80 hover:text-yellow-500 transition rounded-lg hover:bg-white/5"
+            >
+              {label}
+            </Link>
+          ))}
 
-          <Link
-            href="/about"
-            className="text-[13px] font-medium tracking-wide text-white/90 hover:text-yellow-500 transition"
-          >
-            Nosotros
-          </Link>
-
-          <Link
-            href="/contact"
-            className="text-[13px] font-medium tracking-wide text-white/90 hover:text-yellow-500 transition"
-          >
-            Contacto
-          </Link>
+          <div className="w-px h-5 bg-white/10 mx-2" />
 
           <Link
             href={user ? "/account" : "/login"}
-            className="p-2 rounded-full hover:bg-white/5 transition group"
+            className="p-2 rounded-lg hover:bg-white/5 transition group"
             aria-label="Mi cuenta"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-[18px] w-[18px] text-white group-hover:text-yellow-500 transition"
+              className="h-[18px] w-[18px] text-white/80 group-hover:text-yellow-500 transition"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -95,12 +97,12 @@ export default function Navbar() {
 
           <button
             onClick={() => setCartDrawerOpen(true)}
-            className="relative p-2 rounded-full hover:bg-white/5 transition group"
+            className="relative p-2 rounded-lg hover:bg-white/5 transition group"
             aria-label="Abrir carrito"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-[18px] w-[18px] text-white group-hover:text-yellow-500 transition"
+              className="h-[18px] w-[18px] text-white/80 group-hover:text-yellow-500 transition"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -116,22 +118,22 @@ export default function Navbar() {
             </svg>
 
             {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-yellow-500 text-black text-[10px] font-bold flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-400 text-black text-[10px] font-bold flex items-center justify-center shadow-lg">
                 {totalItems}
               </span>
             )}
           </button>
         </div>
 
-        <div className="flex md:hidden items-center gap-2">
+        <div className="flex md:hidden items-center gap-1">
           <Link
             href={user ? "/account" : "/login"}
-            className="p-2 group"
+            className="p-2 rounded-lg hover:bg-white/5 transition group"
             aria-label="Mi cuenta"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-[18px] w-[18px] text-white group-hover:text-yellow-500 transition"
+              className="h-[18px] w-[18px] text-white/80 group-hover:text-yellow-500 transition"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -148,12 +150,12 @@ export default function Navbar() {
 
           <button
             onClick={() => setCartDrawerOpen(true)}
-            className="relative p-2 group"
+            className="relative p-2 rounded-lg hover:bg-white/5 transition group"
             aria-label="Abrir carrito"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-[18px] w-[18px] text-white group-hover:text-yellow-500 transition"
+              className="h-[18px] w-[18px] text-white/80 group-hover:text-yellow-500 transition"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -169,7 +171,7 @@ export default function Navbar() {
             </svg>
 
             {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-yellow-500 text-black text-[10px] font-bold flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-400 text-black text-[10px] font-bold flex items-center justify-center shadow-lg">
                 {totalItems}
               </span>
             )}
@@ -177,12 +179,12 @@ export default function Navbar() {
 
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="p-2 text-white"
+            className="p-2 rounded-lg hover:bg-white/5 transition group"
             aria-label="Abrir menu"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-[18px] w-[18px]"
+              className="h-[18px] w-[18px] text-white/80"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -199,35 +201,28 @@ export default function Navbar() {
       </div>
 
       {mobileOpen && (
-        <nav className="md:hidden border-t border-white/10 bg-black/80 backdrop-blur-md">
-          <div className="px-6 py-5 flex flex-col gap-5 text-[15px]">
-            <Link
-              href="/products"
-              className="text-white/80 hover:text-yellow-500 transition"
-              onClick={() => setMobileOpen(false)}
-            >
-              Productos
-            </Link>
+        <nav className="md:hidden relative z-10 border-t border-white/10 bg-black/80 backdrop-blur-2xl">
+          <div className="px-6 py-5 flex flex-col gap-4 text-[15px]">
+            {[
+              { href: "/products", label: "Productos" },
+              { href: "/about", label: "Nosotros" },
+              { href: "/contact", label: "Contacto" },
+            ].map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className="text-white/70 hover:text-yellow-500 transition py-1"
+                onClick={() => setMobileOpen(false)}
+              >
+                {label}
+              </Link>
+            ))}
 
-            <Link
-              href="/about"
-              className="text-white/80 hover:text-yellow-500 transition"
-              onClick={() => setMobileOpen(false)}
-            >
-              Nosotros
-            </Link>
-
-            <Link
-              href="/contact"
-              className="text-white/80 hover:text-yellow-500 transition"
-              onClick={() => setMobileOpen(false)}
-            >
-              Contacto
-            </Link>
+            <div className="w-full h-px bg-white/10" />
 
             <Link
               href={user ? "/account" : "/login"}
-              className="text-white/80 hover:text-yellow-500 transition"
+              className="text-white/70 hover:text-yellow-500 transition py-1"
               onClick={() => setMobileOpen(false)}
             >
               {user ? "Mi Cuenta" : "Iniciar Sesion"}

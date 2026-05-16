@@ -70,13 +70,17 @@ export default function ProductDetail({
       } else {
         setProduct(data)
 
-        const { data: productImages } = await supabase
-          .from("product_images")
-          .select("*")
-          .eq("product_id", id)
-          .order("sort_order", { ascending: true })
+        try {
+          const { data: productImages } = await supabase
+            .from("product_images")
+            .select("*")
+            .eq("product_id", id)
+            .order("sort_order", { ascending: true })
 
-        setImages((productImages || []) as ProductImage[])
+          setImages((productImages || []) as ProductImage[])
+        } catch {
+          setImages([])
+        }
 
         if (data?.category) {
           const { data: relatedData } = await supabase

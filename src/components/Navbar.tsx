@@ -29,19 +29,10 @@ export default function Navbar() {
   }, [])
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 ${
-        scrolled
-          ? "bg-black/60 backdrop-blur-2xl shadow-[0_1px_30px_-10px_rgba(0,0,0,0.5)]"
-          : "bg-gradient-to-b from-black/40 to-transparent backdrop-blur-sm"
-      }`}
-    >
+    <header className="fixed top-0 left-0 right-0 z-40 bg-black/70 backdrop-blur-2xl shadow-[0_1px_30px_-10px_rgba(0,0,0,0.5)] transition-all duration-500">
       {/* Shine line */}
       <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-yellow-500/30 to-transparent" />
-
-      {scrolled && (
-        <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-      )}
+      <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between relative z-10">
         <Link href="/" className="flex items-center gap-2">

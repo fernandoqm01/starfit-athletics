@@ -24,7 +24,7 @@ export default async function Home() {
   return (
     <main className="min-h-screen overflow-x-hidden">
       {/* HERO */}
-      <section className="relative h-screen flex items-center justify-center text-white hero-clip">
+      <section className="relative h-screen flex items-center justify-center text-white">
         {/* Background image */}
         <Image
           src="/banner.png"

@@ -1,13 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 175 40">
   <defs>
-    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FDE047" />
       <stop offset="50%" stop-color="#D4AF37" />
-      <stop offset="100%" stop-color="#B45309" />
+      <stop offset="100%" stop-color="#A16207" />
     </linearGradient>
   </defs>
-  <!-- Star Icon -->
-  <path d="M12 5L14.5 13H22L16 17.5L18.5 25.5L12 21L5.5 25.5L8 17.5L2 13H9.5L12 5Z" fill="url(#gold)" />
-  <text x="38" y="28" fill="#FFFFFF" font-family="system-ui, sans-serif" font-weight="900" font-size="24" letter-spacing="2">STAR</text>
-  <text x="105" y="28" fill="url(#gold)" font-family="system-ui, sans-serif" font-weight="900" font-size="24" letter-spacing="2">FIT</text>
+
+  <!-- Diamond mark -->
+  <g transform="translate(14, 2)">
+    <path d="M12 0 L22 12 L12 24 L2 12 Z" fill="url(#goldGrad)" opacity="0.95" />
+    <path d="M12 2 L20 12 L12 22 L4 12 Z" fill="none" stroke="white" stroke-width="0.5" opacity="0.2" />
+    <path d="M12 5 L17 12 L12 19 L7 12 Z" fill="white" opacity="0.15" />
+  </g>
+
+  <text x="48" y="28" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="21" letter-spacing="3.5">STAR</text>
+  <text x="117" y="28" fill="url(#goldGrad)" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="21" letter-spacing="3.5">FIT</text>
 </svg>

@@ -6,7 +6,6 @@ import Image from "next/image"
 import CartDrawer from "./CartDrawer"
 import { useCart } from "@/context/CartContext"
 import { supabaseClient as supabase } from "@/lib/supabase-client"
-import CookieBanner from "./CookieBanner"
 
 export default function Navbar() {
   const { totalItems } = useCart()
@@ -232,7 +231,6 @@ export default function Navbar() {
       )}
 
       <CartDrawer open={cartDrawerOpen} onClose={() => setCartDrawerOpen(false)} />
-      <CookieBanner />
     </header>
   )
 }

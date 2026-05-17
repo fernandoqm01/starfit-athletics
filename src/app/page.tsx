@@ -55,22 +55,24 @@ export default async function Home() {
 
         {/* Content */}
         <div className="relative z-10 text-center px-6 max-w-3xl">
-          <span className="inline-block text-[11px] tracking-[0.3em] uppercase text-yellow-500 font-semibold mb-6 animate-hero-text">
+          <span className="inline-block text-[11px] tracking-[0.3em] uppercase text-yellow-500 font-semibold mb-6 opacity-0 animate-hero-word">
             Temporada 2026
           </span>
 
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-[1.1] animate-hero-text" style={{ animationDelay: "0.15s" }}>
-            Rompe tus
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-[1.1]">
+            <span className="inline-block opacity-0 animate-hero-word" style={{ animationDelay: "0.15s" }}>
+              Rompe tus
+            </span>{" "}
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 opacity-0 animate-hero-word" style={{ animationDelay: "0.3s" }}>
               limites
             </span>
           </h1>
 
-          <p className="text-lg md:text-xl max-w-xl mx-auto mb-10 text-gray-200 animate-hero-text" style={{ animationDelay: "0.3s" }}>
+          <p className="text-lg md:text-xl max-w-xl mx-auto mb-10 text-gray-200 opacity-0 animate-hero-float" style={{ animationDelay: "0.5s" }}>
             Equipamiento deportivo disenado para quienes no se rinden. Cada detalle importa cuando buscas la excelencia.
           </p>
 
-          <div className="flex gap-4 justify-center animate-hero-text" style={{ animationDelay: "0.45s" }}>
+          <div className="flex gap-4 justify-center opacity-0 animate-hero-float" style={{ animationDelay: "0.7s" }}>
             <Link
               href="/products"
               className="bg-yellow-500 text-black px-8 py-4 rounded-xl text-lg font-bold hover:bg-yellow-400 transition-all duration-300 animate-pulse-glow active:scale-95"

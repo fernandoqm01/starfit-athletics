@@ -1,9 +1,10 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useCart } from "@/context/CartContext"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import ConfirmModal from "./ConfirmModal"
 
 interface CartDrawerProps {
   open: boolean
@@ -13,6 +14,7 @@ interface CartDrawerProps {
 export default function CartDrawer({ open, onClose }: CartDrawerProps) {
   const { cart, addToCart, removeFromCart, decreaseQuantity, clearCart } = useCart()
   const router = useRouter()
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   useEffect(() => {
     if (open) {
@@ -29,33 +31,25 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
   )
 
   const handleClearCart = () => {
-    if (window.confirm("¿Vaciar carrito?")) {
-      clearCart()
-    }
+    setConfirmOpen(true)
   }
 
-  return (
-    <>
-      {open && (
-        <div
-          className="fixed inset-0 bg-black/40 z-[70]"
-          onClick={onClose}
-        />
-      )}
+  if (!open) return null
 
-      <div
-        className={`fixed top-0 right-0 h-full w-full max-w-md bg-white z-[80] shadow-xl flex flex-col transition-transform duration-300 ${
-          open ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200">
+  return (
+    <div className="fixed inset-0 z-[80] flex items-start justify-center pt-12 pb-12">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col animate-in fade-in zoom-in-95">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 shrink-0">
           <div>
-            <h2 className="text-lg font-bold">Carrito</h2>
+            <h2 className="text-xl font-bold">Carrito</h2>
             <p className="text-sm text-gray-400">{cart.length} {cart.length === 1 ? "articulo" : "articulos"}</p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+            className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
             aria-label="Cerrar"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -64,9 +58,10 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
           </button>
         </div>
 
+        {/* Items */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
           {cart.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center">
+            <div className="flex flex-col items-center justify-center h-full text-center py-16">
               <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-5">
                 <svg className="w-10 h-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
@@ -153,19 +148,28 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
           )}
         </div>
 
+        {/* Footer */}
         {cart.length > 0 && (
-          <div className="border-t border-gray-200 px-6 py-5 space-y-4 bg-white">
+          <div className="border-t border-gray-200 px-6 py-5 space-y-3 bg-white rounded-b-2xl shrink-0">
             <div className="flex justify-between items-center">
               <span className="text-gray-500">Total</span>
               <span className="text-xl font-bold">₡{total.toLocaleString()}</span>
             </div>
 
-            <button
-              onClick={() => { onClose(); router.push("/checkout") }}
-              className="w-full bg-black text-white py-3.5 rounded-xl font-semibold hover:bg-gray-800 transition"
-            >
-              Proceder al pago
-            </button>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => { onClose(); router.push("/cart") }}
+                className="py-3 rounded-xl text-sm font-medium text-gray-600 border border-gray-200 hover:border-black hover:text-black transition"
+              >
+                Ver carrito
+              </button>
+              <button
+                onClick={() => { onClose(); router.push("/checkout") }}
+                className="py-3 rounded-xl text-sm font-semibold bg-black text-white hover:bg-gray-800 transition"
+              >
+                Pagar
+              </button>
+            </div>
 
             <button
               onClick={handleClearCart}
@@ -176,6 +180,17 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
           </div>
         )}
       </div>
-    </>
+
+      <ConfirmModal
+        open={confirmOpen}
+        title="Vaciar carrito"
+        message="Esta accion eliminara todos los productos de tu carrito."
+        confirmLabel="Si, vaciar"
+        cancelLabel="Cancelar"
+        variant="danger"
+        onConfirm={() => { clearCart(); setConfirmOpen(false) }}
+        onCancel={() => setConfirmOpen(false)}
+      />
+    </div>
   )
 }

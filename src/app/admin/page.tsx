@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { supabaseClient as supabase } from "@/lib/supabase-client"
 import { useNotification } from "@/context/NotificationContext"
+import ConfirmModal from "@/components/ConfirmModal"
 
 type ProductImage = {
   id: number
@@ -98,6 +99,7 @@ export default function AdminPage() {
   const [editImageFiles, setEditImageFiles] = useState<File[]>([])
 
   const [uploading, setUploading] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null)
 
   const uploadImage = async (file: File) => {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"]
@@ -382,8 +384,6 @@ export default function AdminPage() {
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm("¿Eliminar producto?")) return
-
     const { error } = await supabase
       .from("products")
       .delete()
@@ -685,7 +685,7 @@ export default function AdminPage() {
                   </button>
 
                   <button
-                    onClick={() => handleDelete(p.id)}
+                    onClick={() => setDeleteTarget(p.id)}
                     className="bg-red-600 text-white px-3 py-1 rounded"
                   >
                     Eliminar
@@ -839,6 +839,17 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={deleteTarget !== null}
+        title="Eliminar producto"
+        message="Esta accion no se puede deshacer."
+        confirmLabel="Si, eliminar"
+        cancelLabel="Cancelar"
+        variant="danger"
+        onConfirm={() => { if (deleteTarget !== null) handleDelete(deleteTarget); setDeleteTarget(null) }}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   )
 }

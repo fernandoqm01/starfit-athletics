@@ -3,10 +3,13 @@
 import { useCart } from "@/context/CartContext"
 import Image from "next/image"
 import Link from "next/link"
+import { useState } from "react"
+import ConfirmModal from "@/components/ConfirmModal"
 
 export default function Cart() {
   const { cart, removeFromCart, addToCart, decreaseQuantity, clearCart } =
     useCart()
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   const subtotal = cart.reduce(
     (acc, item) => acc + item.price * item.quantity,
@@ -49,7 +52,7 @@ export default function Cart() {
           <p className="text-gray-500 text-sm mt-0.5">{cart.length} {cart.length === 1 ? "articulo" : "articulos"}</p>
         </div>
         <button
-          onClick={() => { if (window.confirm("¿Vaciar carrito?")) clearCart() }}
+          onClick={() => setConfirmOpen(true)}
           className="text-sm text-gray-400 hover:text-red-500 flex items-center gap-1.5 transition"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -193,6 +196,17 @@ export default function Cart() {
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        open={confirmOpen}
+        title="Vaciar carrito"
+        message="Esta accion eliminara todos los productos de tu carrito."
+        confirmLabel="Si, vaciar"
+        cancelLabel="Cancelar"
+        variant="danger"
+        onConfirm={() => { clearCart(); setConfirmOpen(false) }}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   )
 }

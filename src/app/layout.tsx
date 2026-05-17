@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import ScrollToTop from "@/components/ScrollToTop"
 import CookieBanner from "@/components/CookieBanner"
+import WhatsAppButton from "@/components/WhatsAppButton"
 import { CartProvider } from "@/context/CartContext"
 import { NotificationProvider } from "@/context/NotificationContext"
 import type { Metadata } from "next"
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Navbar />
             <div className="pt-16">{children}</div>
             <ScrollToTop />
+            <WhatsAppButton />
             <CookieBanner />
             <Footer />
           </CartProvider>

@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { supabaseClient as supabase } from "@/lib/supabase-client"
+import { useNotification } from "@/context/NotificationContext"
 
 type ProductImage = {
   id: number
@@ -38,8 +39,19 @@ const CATEGORIES = [
   "Suplementos",
 ]
 
+function parseSpecs(val: unknown): { key: string; value: string }[] {
+  if (Array.isArray(val)) return val as { key: string; value: string }[]
+  return []
+}
+
+function parseFeatures(val: unknown): string[] {
+  if (Array.isArray(val)) return val as string[]
+  return []
+}
+
 export default function AdminPage() {
   const router = useRouter()
+  const { notify } = useNotification()
 
   const [products, setProducts] = useState<Product[]>([])
   const [editing, setEditing] = useState<Product | null>(null)
@@ -140,7 +152,7 @@ export default function AdminPage() {
 
   const handleCreate = async () => {
     if (!name || !price) {
-      alert("Completa al menos nombre y precio")
+      notify("Completa al menos nombre y precio", "error")
       return
     }
 
@@ -203,12 +215,12 @@ export default function AdminPage() {
         }
       }
 
-      alert("Producto creado")
+      notify("Producto creado", "success")
       resetForm()
       fetchProducts()
     } catch (error) {
       console.error(error)
-      alert("Error al crear producto")
+      notify("Error al crear producto", "error")
     } finally {
       setUploading(false)
     }
@@ -222,14 +234,14 @@ export default function AdminPage() {
     setEditEstDelivery(product.est_delivery || "")
     setEditBrand(product.brand || "")
 
-    const specsArr = product.specifications as unknown as { key: string; value: string }[]
+    const specsArr = parseSpecs(product.specifications)
     setEditSpecs(
       specsArr && specsArr.length > 0
         ? specsArr
         : [{ key: "", value: "" }]
     )
 
-    const featArr = product.features as unknown as string[]
+    const featArr = parseFeatures(product.features)
     setEditFeatures(
       featArr && featArr.length > 0 ? featArr : [""]
     )
@@ -305,13 +317,13 @@ export default function AdminPage() {
         }
       }
 
-      alert("Producto actualizado")
+      notify("Producto actualizado", "success")
       setEditing(null)
       setEditImageFiles([])
       fetchProducts()
     } catch (error) {
       console.error(error)
-      alert("Error al actualizar")
+      notify("Error al actualizar", "error")
     } finally {
       setUploading(false)
     }
@@ -324,7 +336,7 @@ export default function AdminPage() {
       .eq("id", imageId)
 
     if (error) {
-      alert("Error al eliminar imagen")
+      notify("Error al eliminar imagen", "error")
       return
     }
 
@@ -341,11 +353,11 @@ export default function AdminPage() {
 
     if (error) {
       console.error(error)
-      alert("Error al eliminar")
+      notify("Error al eliminar", "error")
       return
     }
 
-    alert("Producto eliminado")
+    notify("Producto eliminado", "success")
     fetchProducts()
   }
 
@@ -645,276 +657,138 @@ export default function AdminPage() {
         )}
       </div>
 
-      {/* Editar */}
+      {/* Modal Editar */}
       {editing && (
-        <form
-          onSubmit={handleUpdate}
-          className="p-5 border rounded-xl space-y-4"
-        >
-          <h2 className="font-semibold text-lg">
-            Editando: {editing.name}
-          </h2>
-
-          <input
-            value={editing.name}
-            onChange={(e) =>
-              setEditing({ ...editing, name: e.target.value })
-            }
-            className="w-full border rounded-lg p-2"
-          />
-
-          <div className="grid grid-cols-2 gap-3">
-            <input
-              type="number"
-              value={editing.price}
-              onChange={(e) =>
-                setEditing({
-                  ...editing,
-                  price: Number(e.target.value),
-                })
-              }
-              className="w-full border rounded-lg p-2"
-            />
-
-            <input
-              type="number"
-              value={editing.stock ?? 0}
-              onChange={(e) =>
-                setEditing({
-                  ...editing,
-                  stock: Number(e.target.value),
-                })
-              }
-              className="w-full border rounded-lg p-2"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <select
-              value={editing.category || ""}
-              onChange={(e) =>
-                setEditing({
-                  ...editing,
-                  category: e.target.value,
-                })
-              }
-              className="w-full border rounded-lg p-2"
-            >
-              <option value="">Selecciona categoria</option>
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-
-            <input
-              placeholder="Marca"
-              value={editBrand}
-              onChange={(e) => setEditBrand(e.target.value)}
-              className="w-full border rounded-lg p-2"
-            />
-          </div>
-
-          <textarea
-            value={editing.description || ""}
-            onChange={(e) =>
-              setEditing({
-                ...editing,
-                description: e.target.value,
-              })
-            }
-            className="w-full border rounded-lg p-2"
-          />
-
-          {/* Dropshipping toggle edit */}
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={editIsDropship}
-              onChange={(e) => setEditIsDropship(e.target.checked)}
-              className="w-4 h-4"
-            />
-            <span className="font-medium">Producto dropshipping</span>
-          </label>
-
-          {editIsDropship && (
-            <div className="grid grid-cols-3 gap-3 pl-6">
-              <input
-                placeholder="Proveedor"
-                value={editSupplierName}
-                onChange={(e) => setEditSupplierName(e.target.value)}
-                className="w-full border rounded-lg p-2"
-              />
-              <input
-                placeholder="URL del producto original"
-                value={editSupplierUrl}
-                onChange={(e) => setEditSupplierUrl(e.target.value)}
-                className="w-full border rounded-lg p-2"
-              />
-              <input
-                placeholder="Tiempo de entrega"
-                value={editEstDelivery}
-                onChange={(e) => setEditEstDelivery(e.target.value)}
-                className="w-full border rounded-lg p-2"
-              />
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-10 pb-10">
+          <div className="fixed inset-0 bg-black/50" onClick={() => { setEditing(null); setEditImageFiles([]); setEditImages([]) }} />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-4 z-10">
+            <div className="flex justify-between items-center">
+              <h2 className="font-semibold text-lg">Editando: {editing.name}</h2>
+              <button
+                type="button"
+                onClick={() => { setEditing(null); setEditImageFiles([]); setEditImages([]) }}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-          )}
 
-          {/* Features edit */}
-          <div>
-            <label className="block text-sm font-semibold mb-2">Caracteristicas destacadas</label>
-            {editFeatures.map((f, i) => (
-              <div key={i} className="flex gap-2 mb-2">
+            <form onSubmit={handleUpdate} className="space-y-4">
+              <input
+                value={editing.name}
+                onChange={(e) => setEditing({ ...editing, name: e.target.value })}
+                className="w-full border rounded-lg p-2"
+              />
+
+              <div className="grid grid-cols-2 gap-3">
                 <input
-                  placeholder="Ej: Material premium"
-                  value={f}
-                  onChange={(e) => {
-                    const next = [...editFeatures]
-                    next[i] = e.target.value
-                    setEditFeatures(next)
-                  }}
-                  className="flex-1 border rounded-lg p-2"
+                  type="number"
+                  value={editing.price}
+                  onChange={(e) => setEditing({ ...editing, price: Number(e.target.value) })}
+                  className="w-full border rounded-lg p-2"
                 />
-                {i > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setEditFeatures(editFeatures.filter((_, j) => j !== i))}
-                    className="text-red-500 text-sm"
-                  >
-                    Quitar
-                  </button>
-                )}
+                <input
+                  type="number"
+                  value={editing.stock ?? 0}
+                  onChange={(e) => setEditing({ ...editing, stock: Number(e.target.value) })}
+                  className="w-full border rounded-lg p-2"
+                />
               </div>
-            ))}
-            <button
-              type="button"
-              onClick={() => setEditFeatures([...editFeatures, ""])}
-              className="text-sm text-blue-600 hover:underline"
-            >
-              + Agregar caracteristica
-            </button>
-          </div>
 
-          {/* Specifications edit */}
-          <div>
-            <label className="block text-sm font-semibold mb-2">Especificaciones</label>
-            {editSpecs.map((s, i) => (
-              <div key={i} className="flex gap-2 mb-2">
+              <div className="grid grid-cols-2 gap-3">
+                <select
+                  value={editing.category || ""}
+                  onChange={(e) => setEditing({ ...editing, category: e.target.value })}
+                  className="w-full border rounded-lg p-2"
+                >
+                  <option value="">Selecciona categoria</option>
+                  {CATEGORIES.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
                 <input
-                  placeholder="Clave"
-                  value={s.key}
-                  onChange={(e) => {
-                    const next = [...editSpecs]
-                    next[i] = { ...next[i], key: e.target.value }
-                    setEditSpecs(next)
-                  }}
-                  className="w-1/3 border rounded-lg p-2"
+                  placeholder="Marca"
+                  value={editBrand}
+                  onChange={(e) => setEditBrand(e.target.value)}
+                  className="w-full border rounded-lg p-2"
                 />
-                <input
-                  placeholder="Valor"
-                  value={s.value}
-                  onChange={(e) => {
-                    const next = [...editSpecs]
-                    next[i] = { ...next[i], value: e.target.value }
-                    setEditSpecs(next)
-                  }}
-                  className="flex-1 border rounded-lg p-2"
-                />
-                {i > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setEditSpecs(editSpecs.filter((_, j) => j !== i))}
-                    className="text-red-500 text-sm"
-                  >
-                    Quitar
-                  </button>
-                )}
               </div>
-            ))}
-            <button
-              type="button"
-              onClick={() => setEditSpecs([...editSpecs, { key: "", value: "" }])}
-              className="text-sm text-blue-600 hover:underline"
-            >
-              + Agregar especificacion
-            </button>
-          </div>
 
-          {/* Images */}
-          <div>
-            <label className="block text-sm font-semibold mb-2">
-              Imagenes del producto (la primera es la principal)
-            </label>
+              <textarea
+                value={editing.description || ""}
+                onChange={(e) => setEditing({ ...editing, description: e.target.value })}
+                className="w-full border rounded-lg p-2"
+              />
 
-            <div className="flex flex-wrap gap-3 mb-3">
-              {editing.image && (
-                <div className="relative group">
-                  <img
-                    src={editing.image}
-                    alt="Principal"
-                    className="w-24 h-24 object-cover rounded-lg border-2 border-black"
-                  />
-                  <span className="absolute -top-2 -left-2 bg-black text-white text-[10px] px-1.5 py-0.5 rounded">
-                    1
-                  </span>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" checked={editIsDropship} onChange={(e) => setEditIsDropship(e.target.checked)} className="w-4 h-4" />
+                <span className="font-medium">Producto dropshipping</span>
+              </label>
+
+              {editIsDropship && (
+                <div className="grid grid-cols-3 gap-3 pl-6">
+                  <input placeholder="Proveedor" value={editSupplierName} onChange={(e) => setEditSupplierName(e.target.value)} className="w-full border rounded-lg p-2" />
+                  <input placeholder="URL del producto original" value={editSupplierUrl} onChange={(e) => setEditSupplierUrl(e.target.value)} className="w-full border rounded-lg p-2" />
+                  <input placeholder="Tiempo de entrega" value={editEstDelivery} onChange={(e) => setEditEstDelivery(e.target.value)} className="w-full border rounded-lg p-2" />
                 </div>
               )}
 
-              {editImages.map((img) => (
-                <div key={img.id} className="relative group">
-                  <img
-                    src={img.url}
-                    alt={img.alt || ""}
-                    className="w-24 h-24 object-cover rounded-lg border"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => deleteProductImage(img.id)}
-                    className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
-                  >
-                    x
-                  </button>
-                  <span className="absolute -bottom-1 left-1 bg-black text-white text-[10px] px-1 py-0.5 rounded">
-                    {img.sort_order + 1}
-                  </span>
+              <div>
+                <label className="block text-sm font-semibold mb-2">Caracteristicas destacadas</label>
+                {editFeatures.map((f, i) => (
+                  <div key={i} className="flex gap-2 mb-2">
+                    <input placeholder="Ej: Material premium" value={f} onChange={(e) => { const next = [...editFeatures]; next[i] = e.target.value; setEditFeatures(next) }} className="flex-1 border rounded-lg p-2" />
+                    {i > 0 && <button type="button" onClick={() => setEditFeatures(editFeatures.filter((_, j) => j !== i))} className="text-red-500 text-sm">Quitar</button>}
+                  </div>
+                ))}
+                <button type="button" onClick={() => setEditFeatures([...editFeatures, ""])} className="text-sm text-blue-600 hover:underline">+ Agregar caracteristica</button>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold mb-2">Especificaciones</label>
+                {editSpecs.map((s, i) => (
+                  <div key={i} className="flex gap-2 mb-2">
+                    <input placeholder="Clave" value={s.key} onChange={(e) => { const next = [...editSpecs]; next[i] = { ...next[i], key: e.target.value }; setEditSpecs(next) }} className="w-1/3 border rounded-lg p-2" />
+                    <input placeholder="Valor" value={s.value} onChange={(e) => { const next = [...editSpecs]; next[i] = { ...next[i], value: e.target.value }; setEditSpecs(next) }} className="flex-1 border rounded-lg p-2" />
+                    {i > 0 && <button type="button" onClick={() => setEditSpecs(editSpecs.filter((_, j) => j !== i))} className="text-red-500 text-sm">Quitar</button>}
+                  </div>
+                ))}
+                <button type="button" onClick={() => setEditSpecs([...editSpecs, { key: "", value: "" }])} className="text-sm text-blue-600 hover:underline">+ Agregar especificacion</button>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold mb-2">Imagenes del producto (la primera es la principal)</label>
+                <div className="flex flex-wrap gap-3 mb-3">
+                  {editing.image && (
+                    <div className="relative group">
+                      <img src={editing.image} alt="Principal" className="w-24 h-24 object-cover rounded-lg border-2 border-black" />
+                      <span className="absolute -top-2 -left-2 bg-black text-white text-[10px] px-1.5 py-0.5 rounded">1</span>
+                    </div>
+                  )}
+                  {editImages.map((img) => (
+                    <div key={img.id} className="relative group">
+                      <img src={img.url} alt={img.alt || ""} className="w-24 h-24 object-cover rounded-lg border" />
+                      <button type="button" onClick={() => deleteProductImage(img.id)} className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition">x</button>
+                      <span className="absolute -bottom-1 left-1 bg-black text-white text-[10px] px-1 py-0.5 rounded">{img.sort_order + 1}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+                <input type="file" accept="image/*" multiple onChange={(e) => setEditImageFiles(e.target.files ? Array.from(e.target.files) : [])} className="w-full border rounded-lg p-2" />
+              </div>
 
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={(e) =>
-                setEditImageFiles(e.target.files ? Array.from(e.target.files) : [])
-              }
-              className="w-full border rounded-lg p-2"
-            />
+              <div className="flex gap-3">
+                <button type="submit" disabled={uploading} className="bg-green-600 text-white px-4 py-2 rounded-lg disabled:opacity-50">
+                  {uploading ? "Guardando..." : "Guardar cambios"}
+                </button>
+                <button type="button" onClick={() => { setEditing(null); setEditImageFiles([]); setEditImages([]) }} className="bg-gray-300 px-4 py-2 rounded-lg">
+                  Cancelar
+                </button>
+              </div>
+            </form>
           </div>
-
-          <div className="flex gap-3">
-            <button
-              type="submit"
-              disabled={uploading}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg disabled:opacity-50"
-            >
-              {uploading ? "Guardando..." : "Guardar cambios"}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setEditing(null)
-                setEditImageFiles([])
-                setEditImages([])
-              }}
-              className="bg-gray-300 px-4 py-2 rounded-lg"
-            >
-              Cancelar
-            </button>
-          </div>
-        </form>
+        </div>
       )}
     </div>
   )

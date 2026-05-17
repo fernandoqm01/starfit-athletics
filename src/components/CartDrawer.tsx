@@ -10,7 +10,7 @@ interface CartDrawerProps {
 }
 
 export default function CartDrawer({ open, onClose }: CartDrawerProps) {
-  const { cart, removeFromCart, decreaseQuantity, clearCart } = useCart()
+  const { cart, addToCart, removeFromCart, decreaseQuantity, clearCart } = useCart()
   const router = useRouter()
 
   const total = cart.reduce(
@@ -136,7 +136,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() => removeFromCart(item.id, item.size)}
+                        onClick={() => addToCart(item)}
                         className="w-7 h-7 flex items-center justify-center rounded border hover:bg-gray-100 transition text-sm"
                       >
                         +

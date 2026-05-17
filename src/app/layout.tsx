@@ -5,6 +5,7 @@ import Footer from "@/components/Footer"
 import ScrollToTop from "@/components/ScrollToTop"
 import CookieBanner from "@/components/CookieBanner"
 import { CartProvider } from "@/context/CartContext"
+import { NotificationProvider } from "@/context/NotificationContext"
 import type { Metadata } from "next"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -42,13 +43,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es">
       <body className={inter.className}>
-        <CartProvider>
-          <Navbar />
-          <div className="pt-16">{children}</div>
-          <ScrollToTop />
-          <CookieBanner />
-          <Footer />
-        </CartProvider>
+        <NotificationProvider>
+          <CartProvider>
+            <Navbar />
+            <div className="pt-16">{children}</div>
+            <ScrollToTop />
+            <CookieBanner />
+            <Footer />
+          </CartProvider>
+        </NotificationProvider>
       </body>
     </html>
   )

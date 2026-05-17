@@ -35,6 +35,16 @@ const SIZES = ["XS", "S", "M", "L", "XL", "XXL"]
 
 const TABS = ["Descripcion", "Caracteristicas", "Especificaciones", "Envio"]
 
+function parseSpecs(val: unknown): { key: string; value: string }[] {
+  if (Array.isArray(val)) return val as { key: string; value: string }[]
+  return []
+}
+
+function parseFeatures(val: unknown): string[] {
+  if (Array.isArray(val)) return val as string[]
+  return []
+}
+
 export default function ProductDetail({
   params,
 }: {
@@ -122,8 +132,8 @@ export default function ProductDetail({
   const stock = product.stock ?? 0
   const isLowStock = stock > 0 && stock <= 5
   const isOutOfStock = stock === 0
-  const specs = product.specifications as unknown as { key: string; value: string }[]
-  const features = product.features as unknown as string[]
+  const specs = parseSpecs(product.specifications)
+  const features = parseFeatures(product.features)
 
   return (
     <div className="max-w-6xl mx-auto">

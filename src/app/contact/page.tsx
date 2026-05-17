@@ -1,8 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import { useNotification } from "@/context/NotificationContext"
 
 export default function Contact() {
+  const { notify } = useNotification()
   const [form, setForm] = useState({
     nombre: "",
     email: "",
@@ -10,15 +12,30 @@ export default function Contact() {
     mensaje: "",
   })
   const [sent, setSent] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSent(true)
-    setForm({ nombre: "", email: "", asunto: "", mensaje: "" })
+    setLoading(true)
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      })
+      if (!res.ok) throw new Error()
+      setSent(true)
+      setForm({ nombre: "", email: "", asunto: "", mensaje: "" })
+      notify("Mensaje enviado con exito", "success")
+    } catch {
+      notify("Error al enviar el mensaje", "error")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -164,9 +181,10 @@ export default function Contact() {
               />
               <button
                 type="submit"
-                className="w-full bg-black text-white py-3 rounded-xl font-semibold hover:bg-gray-800 transition"
+                disabled={loading}
+                className="w-full bg-black text-white py-3 rounded-xl font-semibold hover:bg-gray-800 transition disabled:opacity-50"
               >
-                Enviar mensaje
+                {loading ? "Enviando..." : "Enviar mensaje"}
               </button>
             </form>
           )}

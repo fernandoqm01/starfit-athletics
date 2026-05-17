@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react"
 import { supabaseClient as supabase } from "@/lib/supabase-client"
 import Link from "next/link"
+import { useNotification } from "@/context/NotificationContext"
 
 type OrderItem = {
   product_id: number
@@ -38,6 +39,7 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 export default function OrdersPage() {
+  const { notify } = useNotification()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<Order | null>(null)
@@ -69,7 +71,7 @@ export default function OrdersPage() {
       .eq("id", id)
 
     if (error) {
-      alert("Error al actualizar")
+      notify("Error al actualizar", "error")
       return
     }
 

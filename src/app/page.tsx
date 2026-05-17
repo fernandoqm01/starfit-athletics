@@ -94,53 +94,102 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Wave divider */}
+      <div className="relative -mt-1">
+        <svg viewBox="0 0 1440 60" fill="none" className="w-full h-auto">
+          <path d="M0 30C240 60 480 0 720 30C960 60 1200 0 1440 30V60H0V30Z" fill="#f8fafc" />
+        </svg>
+      </div>
+
       {/* FEATURES */}
-      <section className="py-20 px-6 grid md:grid-cols-3 gap-8 text-center max-w-5xl mx-auto">
-        <div className="p-6 rounded-xl hover:shadow-lg transition hover:-translate-y-1 duration-300 animate-scale-in" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
-          <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
+      <section className="py-20 px-6 bg-[#f8fafc]">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <span className="text-[11px] tracking-[0.3em] uppercase text-yellow-600 font-semibold">Por que StarFit</span>
+            <h2 className="text-3xl font-bold mt-3">Todo lo que necesitas</h2>
+            <div className="w-12 h-1 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full mx-auto mt-4" />
           </div>
-          <h3 className="text-xl font-bold mb-2">Alto rendimiento</h3>
-          <p className="text-gray-600">
-            Materiales disenados para entrenamientos intensos.
-          </p>
-        </div>
 
-        <div className="p-6 rounded-xl hover:shadow-lg transition hover:-translate-y-1 duration-300 animate-scale-in" style={{ animationDelay: "0.2s", animationFillMode: "both" }}>
-          <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-            </svg>
-          </div>
-          <h3 className="text-xl font-bold mb-2">Comodidad total</h3>
-          <p className="text-gray-600">
-            Diseno ergonomico para moverte sin limites.
-          </p>
-        </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                num: "01",
+                title: "Alto rendimiento",
+                desc: "Materiales disenados para entrenamientos intensos.",
+                icon: "bolt",
+              },
+              {
+                num: "02",
+                title: "Comodidad total",
+                desc: "Diseno ergonomico para moverte sin limites.",
+                icon: "sparkles",
+              },
+              {
+                num: "03",
+                title: "Envio rapido",
+                desc: "Recibe tu pedido en la puerta de tu casa.",
+                icon: "truck",
+              },
+            ].map((item, i) => (
+              <div
+                key={item.num}
+                className="group relative bg-white rounded-2xl border border-gray-100 p-8 hover:shadow-xl hover:border-yellow-200 transition-all duration-500 animate-scale-in hover:-translate-y-1.5"
+                style={{ animationDelay: `${i * 0.1}s`, animationFillMode: "both" }}
+              >
+                {/* Number background */}
+                <span className="absolute top-3 right-5 text-5xl font-black text-gray-100 select-none transition-all duration-500 group-hover:text-yellow-100 group-hover:scale-110">
+                  {item.num}
+                </span>
 
-        <div className="p-6 rounded-xl hover:shadow-lg transition hover:-translate-y-1 duration-300 animate-scale-in" style={{ animationDelay: "0.3s", animationFillMode: "both" }}>
-          <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-            </svg>
+                {/* Icon */}
+                <div className="w-14 h-14 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl flex items-center justify-center mb-5 shadow-lg shadow-yellow-200/50 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3">
+                  {item.icon === "bolt" ? (
+                    <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  ) : item.icon === "sparkles" ? (
+                    <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                    </svg>
+                  )}
+                </div>
+
+                <h3 className="text-xl font-bold mb-2 relative z-10">{item.title}</h3>
+                <p className="text-gray-500 relative z-10">{item.desc}</p>
+
+                {/* Hover glow */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-yellow-50/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+              </div>
+            ))}
           </div>
-          <h3 className="text-xl font-bold mb-2">Envio rapido</h3>
-          <p className="text-gray-600">
-            Recibe tu pedido en la puerta de tu casa.
-          </p>
         </div>
       </section>
 
       {/* PRODUCTOS */}
-      <section className="py-20 px-6 bg-gray-50">
-        <h2 className="text-3xl font-bold text-center mb-4 animate-slide-in-up">
-          Productos destacados
-        </h2>
-        <p className="text-center text-gray-500 mb-10 max-w-xl mx-auto animate-slide-in-up" style={{ animationDelay: "0.1s" }}>
-          Los productos mas populares entre nuestros clientes
-        </p>
+      <section className="py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+            <div>
+              <span className="text-[11px] tracking-[0.3em] uppercase text-yellow-600 font-semibold">Coleccion</span>
+              <h2 className="text-3xl font-bold mt-3">Productos destacados</h2>
+              <p className="text-gray-500 mt-2 max-w-md">
+                Los productos mas populares entre nuestros clientes
+              </p>
+            </div>
+            <Link
+              href="/products"
+              className="group inline-flex items-center gap-2 text-sm font-semibold text-black hover:text-yellow-600 transition px-6 py-3 rounded-xl border-2 border-black hover:border-yellow-500"
+            >
+              Ver todos
+              <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
+          </div>
 
         <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-5 max-w-6xl mx-auto">
           {products.length === 0 ? (
@@ -188,28 +237,43 @@ export default async function Home() {
         <div className="text-center mt-10">
           <Link
             href="/products"
-            className="inline-block border-2 border-black text-black px-8 py-3 rounded-xl font-semibold hover:bg-black hover:text-white transition"
+            className="group inline-flex items-center gap-2 text-sm font-semibold text-black hover:text-yellow-600 transition px-6 py-3 rounded-xl border-2 border-black hover:border-yellow-500"
           >
             Ver todos los productos
+            <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
           </Link>
+        </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-24 text-center px-6 bg-black text-white">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4 animate-slide-in-up">
-          Lleva tu rendimiento al siguiente nivel
-        </h2>
-        <p className="text-gray-400 mb-8 max-w-lg mx-auto animate-slide-in-up" style={{ animationDelay: "0.1s" }}>
-          Unete a miles de atletas que ya confian en StarFit para su entrenamiento diario.
-        </p>
-        <Link
-          href="/products"
-          className="bg-white text-black px-8 py-4 rounded-xl text-lg font-semibold hover:scale-105 transition inline-block animate-slide-in-up active:scale-95"
-          style={{ animationDelay: "0.2s", animationFillMode: "both" }}
-        >
-          Comprar ahora
-        </Link>
+      <section className="relative py-24 text-center px-6 bg-black text-white overflow-hidden">
+        {/* Decorative shapes */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-20 -right-20 w-60 h-60 bg-yellow-500/5 rounded-full blur-3xl" />
+          <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-yellow-500/5 rounded-full blur-3xl" />
+        </div>
+
+        <div className="relative z-10 max-w-2xl mx-auto">
+          <span className="text-[11px] tracking-[0.3em] uppercase text-yellow-500 font-semibold animate-slide-in-up">StarFit 2026</span>
+          <h2 className="text-3xl md:text-4xl font-bold mt-4 mb-4 animate-slide-in-up" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
+            Lleva tu rendimiento al siguiente nivel
+          </h2>
+          <p className="text-gray-400 mb-8 max-w-lg mx-auto animate-slide-in-up" style={{ animationDelay: "0.2s", animationFillMode: "both" }}>
+            Unete a miles de atletas que ya confian en StarFit para su entrenamiento diario.
+          </p>
+          <Link
+            href="/products"
+            className="group inline-flex items-center gap-2 bg-yellow-500 text-black px-8 py-4 rounded-xl text-lg font-bold hover:bg-yellow-400 transition-all duration-300 animate-pulse-glow active:scale-95"
+          >
+            Comprar ahora
+            <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </Link>
+        </div>
       </section>
     </main>
   )

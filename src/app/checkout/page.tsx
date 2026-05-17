@@ -3,11 +3,12 @@
 import { useState } from "react"
 import { useCart } from "@/context/CartContext"
 import { useRouter } from "next/navigation"
-import { supabaseClient as supabase } from "@/lib/supabase-client"
+import { useNotification } from "@/context/NotificationContext"
 
 export default function Checkout() {
   const router = useRouter()
   const { cart, clearCart } = useCart()
+  const { notify } = useNotification()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
 
@@ -36,63 +37,29 @@ export default function Checkout() {
     e.preventDefault()
 
     if (formData.metodo === "sinpe" && !formData.sinpeReferencia) {
-      alert("Por favor ingrese el numero de comprobante SINPE")
+      notify("Por favor ingrese el numero de comprobante SINPE", "error")
       return
     }
 
     setLoading(true)
 
     try {
-      for (const item of cart) {
-        const { data: product, error: fetchError } = await supabase
-          .from("products")
-          .select("stock")
-          .eq("id", item.id)
-          .single()
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cart, formData, total }),
+      })
 
-        if (fetchError) throw new Error("Error al verificar inventario")
-        if (!product || product.stock < item.quantity) {
-          throw new Error(`Stock insuficiente para ${item.name}`)
-        }
+      const data = await res.json()
 
-        const { error: updateError } = await supabase
-          .from("products")
-          .update({ stock: product.stock - item.quantity })
-          .eq("id", item.id)
-
-        if (updateError) throw new Error("Error al actualizar inventario")
+      if (!res.ok) {
+        throw new Error(data.error || "Error al procesar la orden")
       }
-
-      const { data: { user } } = await supabase.auth.getUser()
-
-      const order = {
-        user_id: user?.id ?? null,
-        customer_name: formData.nombre,
-        customer_email: formData.email,
-        customer_phone: formData.telefono,
-        customer_address: formData.direccion,
-        customer_city: formData.ciudad,
-        payment_method: formData.metodo,
-        sinpe_referencia: formData.sinpeReferencia || null,
-        total,
-        items: cart.map((item) => ({
-          product_id: item.id,
-          product_name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-          size: item.size || null,
-        })),
-        status: "pendiente_pago",
-      }
-
-      const { error } = await supabase.from("orders").insert([order])
-
-      if (error) throw error
 
       clearCart()
       setStep(3)
     } catch {
-      alert("Error al procesar la orden. Intenta de nuevo.")
+      notify("Error al procesar la orden. Intenta de nuevo.", "error")
     } finally {
       setLoading(false)
     }

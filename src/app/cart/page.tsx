@@ -80,25 +80,25 @@ export default function Cart() {
         </div>
       )}
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-3">
+      <div className="grid lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-4">
           {cart.map((item) => (
             <div
               key={`${item.id}-${item.size}`}
-              className="flex items-center gap-4 bg-white border border-gray-200 rounded-xl p-4"
+              className="flex items-center gap-6 bg-white border border-gray-200 rounded-2xl p-6"
             >
-              <div className="w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-gray-100">
+              <div className="w-28 h-28 shrink-0 rounded-xl overflow-hidden bg-gray-100">
                 {item.image && item.image.startsWith("http") ? (
                   <Image
                     src={item.image}
                     alt={item.name}
-                    width={80}
-                    height={80}
+                    width={112}
+                    height={112}
                     className="w-full h-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                    <svg className="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
                     </svg>
                   </div>
@@ -108,34 +108,34 @@ export default function Cart() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <h3 className="font-medium text-sm">{item.name}</h3>
+                    <h3 className="font-semibold text-base">{item.name}</h3>
                     {item.size && (
-                      <span className="inline-block mt-1 text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                      <span className="inline-block mt-1.5 text-sm text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-md">
                         Talla {item.size}
                       </span>
                     )}
                   </div>
-                  <p className="font-semibold text-sm shrink-0">₡{(item.price * item.quantity).toLocaleString()}</p>
+                  <p className="font-bold text-base shrink-0">₡{(item.price * item.quantity).toLocaleString()}</p>
                 </div>
 
-                <div className="flex items-center justify-between mt-3">
+                <div className="flex items-center justify-between mt-4">
                   <div className="flex items-center border border-gray-200 rounded-lg">
                     <button
                       onClick={() => decreaseQuantity(item.id, item.size!)}
-                      className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 transition text-gray-500"
+                      className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition text-gray-500"
                     >
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
                       </svg>
                     </button>
-                    <span className="w-8 text-center text-sm h-8 flex items-center justify-center border-x border-gray-200 bg-white">
+                    <span className="w-10 text-center text-base h-10 flex items-center justify-center border-x border-gray-200 bg-white font-medium">
                       {item.quantity}
                     </span>
                     <button
                       onClick={() => addToCart(item)}
-                      className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 transition text-gray-500"
+                      className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition text-gray-500"
                     >
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                       </svg>
                     </button>
@@ -143,7 +143,7 @@ export default function Cart() {
 
                   <button
                     onClick={() => removeFromCart(item.id, item.size)}
-                    className="text-xs text-gray-400 hover:text-red-500 transition"
+                    className="text-sm text-gray-400 hover:text-red-500 transition font-medium"
                   >
                     Eliminar
                   </button>

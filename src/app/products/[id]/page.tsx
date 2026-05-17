@@ -79,6 +79,7 @@ export default function ProductDetail({
         console.error(error)
       } else {
         setProduct(data)
+        document.title = `${data.name} | StarFit`
 
         try {
           const { data: productImages } = await supabase

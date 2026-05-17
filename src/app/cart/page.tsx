@@ -49,7 +49,7 @@ export default function Cart() {
           <p className="text-gray-500 text-sm mt-0.5">{cart.length} {cart.length === 1 ? "articulo" : "articulos"}</p>
         </div>
         <button
-          onClick={clearCart}
+          onClick={() => { if (window.confirm("¿Vaciar carrito?")) clearCart() }}
           className="text-sm text-gray-400 hover:text-red-500 flex items-center gap-1.5 transition"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

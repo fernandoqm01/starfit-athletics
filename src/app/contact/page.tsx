@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useNotification } from "@/context/NotificationContext"
 
 export default function Contact() {
@@ -13,6 +13,8 @@ export default function Contact() {
   })
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [honeypot, setHoneypot] = useState("")
+  const startTime = useRef(Date.now())
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
@@ -20,6 +22,14 @@ export default function Contact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (honeypot) return
+
+    if (Date.now() - startTime.current < 2000) {
+      notify("Espera unos segundos antes de enviar", "error")
+      return
+    }
+
     setLoading(true)
     try {
       const res = await fetch("/api/contact", {
@@ -46,7 +56,6 @@ export default function Contact() {
       </p>
 
       <div className="grid md:grid-cols-2 gap-12">
-        {/* Info */}
         <div className="space-y-8">
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
@@ -98,7 +107,6 @@ export default function Contact() {
             </div>
           </div>
 
-          {/* Redes */}
           <div>
             <h3 className="font-semibold mb-3">Siguenos</h3>
             <div className="flex gap-3">
@@ -121,7 +129,6 @@ export default function Contact() {
           </div>
         </div>
 
-        {/* Form */}
         <div>
           {sent ? (
             <div className="bg-green-50 border border-green-200 rounded-xl p-8 text-center h-full flex items-center justify-center">
@@ -136,7 +143,7 @@ export default function Contact() {
                   Te responderemos lo mas pronto posible.
                 </p>
                 <button
-                  onClick={() => setSent(false)}
+                  onClick={() => { setSent(false); startTime.current = Date.now() }}
                   className="mt-4 text-blue-600 hover:underline text-sm"
                 >
                   Enviar otro mensaje
@@ -144,7 +151,10 @@ export default function Contact() {
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 relative">
+              <div className="absolute opacity-0 pointer-events-none" aria-hidden="true">
+                <input name="website" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} tabIndex={-1} autoComplete="off" />
+              </div>
               <input
                 name="nombre"
                 placeholder="Nombre"

@@ -197,6 +197,8 @@ export default function Navbar() {
             {[
               { href: "/products", label: "Productos" },
               { href: "/about", label: "Nosotros" },
+              { href: "/faq", label: "FAQ" },
+              { href: "/track", label: "Seguir orden" },
               { href: "/contact", label: "Contacto" },
             ].map(({ href, label }) => (
               <Link

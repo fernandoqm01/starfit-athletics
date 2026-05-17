@@ -14,11 +14,22 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json()
-    const { nombre, email, asunto, mensaje } = body
+    const { nombre, email, asunto, mensaje, website } = body
 
     if (!nombre || !email || !asunto || !mensaje) {
       return NextResponse.json(
         { error: "Todos los campos son obligatorios" },
+        { status: 400 }
+      )
+    }
+
+    if (website) {
+      return NextResponse.json({ success: true })
+    }
+
+    if (nombre.length > 100 || email.length > 200 || asunto.length > 200 || mensaje.length > 5000) {
+      return NextResponse.json(
+        { error: "Uno o mas campos exceden el limite de caracteres" },
         { status: 400 }
       )
     }

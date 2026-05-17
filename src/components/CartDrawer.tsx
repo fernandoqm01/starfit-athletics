@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import { useCart } from "@/context/CartContext"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
@@ -13,10 +14,25 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
   const { cart, addToCart, removeFromCart, decreaseQuantity, clearCart } = useCart()
   const router = useRouter()
 
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
+    }
+    return () => { document.body.style.overflow = "" }
+  }, [open])
+
   const total = cart.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
   )
+
+  const handleClearCart = () => {
+    if (window.confirm("¿Vaciar carrito?")) {
+      clearCart()
+    }
+  }
 
   return (
     <>
@@ -152,7 +168,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
             </button>
 
             <button
-              onClick={clearCart}
+              onClick={handleClearCart}
               className="w-full text-sm text-gray-400 hover:text-red-500 py-1 transition"
             >
               Vaciar carrito

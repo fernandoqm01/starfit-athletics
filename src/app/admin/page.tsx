@@ -56,6 +56,17 @@ function sanitize(val: string): string {
 export default function AdminPage() {
   const router = useRouter()
   const { notify } = useNotification()
+  const [isAuthed, setIsAuthed] = useState(false)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) {
+        router.replace("/login")
+      } else {
+        setIsAuthed(true)
+      }
+    })
+  }, [router])
 
   const [products, setProducts] = useState<Product[]>([])
   const [editing, setEditing] = useState<Product | null>(null)
@@ -392,6 +403,8 @@ export default function AdminPage() {
     await supabase.auth.signOut()
     router.push("/")
   }
+
+  if (!isAuthed) return null
 
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-10">

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import CartDrawer from "./CartDrawer"
 import { useCart } from "@/context/CartContext"
 import { supabaseClient as supabase } from "@/lib/supabase-client"
@@ -35,15 +34,17 @@ export default function Navbar() {
       <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between relative z-10">
-        <Link href="/" className="flex items-center gap-2">
-          <Image
-            src="/logo.svg"
-            alt="StarFit"
-            width={110}
-            height={32}
-            className="h-8 w-auto"
-            priority
-          />
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center shadow-lg shadow-yellow-500/20 group-hover:shadow-yellow-500/40 transition-shadow">
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <span className="text-xl font-extrabold tracking-tight text-white">
+              STAR<span className="text-yellow-400">FIT</span>
+            </span>
+          </div>
         </Link>
 
         <div className="hidden md:flex items-center gap-1">

@@ -49,6 +49,10 @@ function parseFeatures(val: unknown): string[] {
   return []
 }
 
+function sanitize(val: string): string {
+  return val.replace(/<[^>]*>/g, "").trim()
+}
+
 export default function AdminPage() {
   const router = useRouter()
   const { notify } = useNotification()
@@ -85,6 +89,15 @@ export default function AdminPage() {
   const [uploading, setUploading] = useState(false)
 
   const uploadImage = async (file: File) => {
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"]
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error("Formato de imagen no valido. Usa JPG, PNG, WebP o AVIF.")
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error("La imagen no puede superar los 5MB.")
+    }
+
     const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`
 
     const { error } = await supabase.storage
@@ -100,11 +113,17 @@ export default function AdminPage() {
     return data.publicUrl
   }
 
-  const fetchProducts = async () => {
+  const [page, setPage] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
+  const PAGE_SIZE = 20
+
+  const fetchProducts = async (reset = false) => {
+    const from = reset ? 0 : page * PAGE_SIZE
     const { data, error } = await supabase
       .from("products")
       .select("*")
       .order("id", { ascending: false })
+      .range(from, from + PAGE_SIZE - 1)
 
     if (error) {
       console.error(error)
@@ -126,11 +145,19 @@ export default function AdminPage() {
       brand: p.brand || "",
     }))
 
-    setProducts(cleanData)
+    if (reset) {
+      setProducts(cleanData)
+      setPage(1)
+    } else {
+      setProducts((prev) => [...prev, ...cleanData])
+      setPage((prev) => prev + 1)
+    }
+
+    setHasMore(cleanData.length === PAGE_SIZE)
   }
 
   useEffect(() => {
-    fetchProducts()
+    fetchProducts(true)
   }, [])
 
   const resetForm = () => {
@@ -171,17 +198,17 @@ export default function AdminPage() {
         .from("products")
         .insert([
           {
-            name,
+            name: sanitize(name),
             price: Number(price),
             image: mainImage,
-            description,
-            category,
+            description: sanitize(description),
+            category: category || null,
             stock: Number(stock) || 0,
             is_dropship: isDropship,
-            supplier_name: isDropship ? supplierName : null,
-            supplier_url: isDropship ? supplierUrl : null,
-            est_delivery: isDropship ? estDelivery : null,
-            brand: brand || null,
+            supplier_name: isDropship ? sanitize(supplierName) : null,
+            supplier_url: isDropship ? sanitize(supplierUrl) : null,
+            est_delivery: isDropship ? sanitize(estDelivery) : null,
+            brand: sanitize(brand) || null,
             specifications: specs.filter((s) => s.key && s.value),
             features: features.filter((f) => f.trim()),
           },
@@ -217,7 +244,7 @@ export default function AdminPage() {
 
       notify("Producto creado", "success")
       resetForm()
-      fetchProducts()
+      fetchProducts(true)
     } catch (error) {
       console.error(error)
       notify("Error al crear producto", "error")
@@ -282,10 +309,10 @@ export default function AdminPage() {
           category: editing.category,
           stock: editing.stock,
           is_dropship: editIsDropship,
-          supplier_name: editIsDropship ? editSupplierName : null,
-          supplier_url: editIsDropship ? editSupplierUrl : null,
-          est_delivery: editIsDropship ? editEstDelivery : null,
-          brand: editBrand || null,
+          supplier_name: editIsDropship ? sanitize(editSupplierName) : null,
+          supplier_url: editIsDropship ? sanitize(editSupplierUrl) : null,
+          est_delivery: editIsDropship ? sanitize(editEstDelivery) : null,
+          brand: sanitize(editBrand) || null,
           specifications: editSpecs.filter((s) => s.key && s.value),
           features: editFeatures.filter((f) => f.trim()),
         })
@@ -320,7 +347,7 @@ export default function AdminPage() {
       notify("Producto actualizado", "success")
       setEditing(null)
       setEditImageFiles([])
-      fetchProducts()
+      fetchProducts(true)
     } catch (error) {
       console.error(error)
       notify("Error al actualizar", "error")
@@ -358,7 +385,7 @@ export default function AdminPage() {
     }
 
     notify("Producto eliminado", "success")
-    fetchProducts()
+    fetchProducts(true)
   }
 
   const handleSignOut = async () => {
@@ -654,6 +681,15 @@ export default function AdminPage() {
               </div>
             )
           })
+        )}
+
+        {hasMore && (
+          <button
+            onClick={() => fetchProducts()}
+            className="w-full py-3 text-sm font-medium text-gray-500 hover:text-black border border-dashed border-gray-300 rounded-xl transition"
+          >
+            Cargar mas productos
+          </button>
         )}
       </div>
 

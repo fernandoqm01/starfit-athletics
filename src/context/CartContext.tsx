@@ -9,6 +9,7 @@ type Product = {
   price: number
   image?: string
   size?: string
+  stock: number
 }
 
 type CartItem = Product & {
@@ -33,7 +34,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const savedCart = localStorage.getItem("cart")
-      if (savedCart) setCart(JSON.parse(savedCart))
+      if (savedCart) {
+        const parsed = JSON.parse(savedCart) as CartItem[]
+        setCart(parsed.map((item) => ({ ...item, stock: item.stock ?? 99 })))
+      }
     } catch {
       console.error("Failed to parse cart from localStorage")
     }
@@ -44,12 +48,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [cart])
 
   const addToCart = (product: Product) => {
+    const available = product.stock ?? 99
+
     setCart((prev) => {
       const existing = prev.find(
         (item) => item.id === product.id && item.size === product.size
       )
 
       if (existing) {
+        if (existing.quantity >= available) {
+          return prev
+        }
         return prev.map((item) =>
           item.id === product.id && item.size === product.size
             ? { ...item, quantity: item.quantity + 1 }
@@ -57,8 +66,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         )
       }
 
+      if (available < 1) {
+        return prev
+      }
+
       return [...prev, { ...product, quantity: 1 }]
     })
+
     const msg = product.size
       ? `${product.name} (Talla ${product.size}) agregado`
       : `${product.name} agregado`

@@ -116,7 +116,7 @@ export default function ProductDetail({
       return
     }
     setSizeError(false)
-    addToCart({ ...product, size: selectedSize })
+    addToCart({ ...product, size: selectedSize, stock: product.stock ?? 0 })
   }
 
   const handlePrevImage = () => {

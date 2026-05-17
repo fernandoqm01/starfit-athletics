@@ -1,7 +1,17 @@
 import { NextResponse } from "next/server"
 import { supabase } from "@/lib/supabase"
+import { rateLimit } from "@/lib/rate-limit"
 
 export async function POST(request: Request) {
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+  const { allowed, remaining } = rateLimit(ip)
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Demasiadas solicitudes. Intenta de nuevo en un minuto." },
+      { status: 429, headers: { "Retry-After": "60" } }
+    )
+  }
+
   try {
     const body = await request.json()
     const { cart, formData, total } = body

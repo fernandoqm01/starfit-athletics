@@ -13,78 +13,110 @@ export async function POST(request: Request) {
       )
     }
 
-    for (const item of cart) {
-      const { data: product, error: fetchError } = await supabase
-        .from("products")
-        .select("stock")
-        .eq("id", item.id)
-        .single()
-
-      if (fetchError) {
-        return NextResponse.json(
-          { error: "Error al verificar inventario" },
-          { status: 500 }
-        )
-      }
-
-      if (!product || product.stock < item.quantity) {
-        return NextResponse.json(
-          { error: `Stock insuficiente para ${item.name}` },
-          { status: 400 }
-        )
-      }
-
-      const { error: updateError } = await supabase
-        .from("products")
-        .update({ stock: product.stock - item.quantity })
-        .eq("id", item.id)
-
-      if (updateError) {
-        return NextResponse.json(
-          { error: "Error al actualizar inventario" },
-          { status: 500 }
-        )
-      }
-    }
-
-    const { data: { user } } = await supabase.auth.getUser()
-
-    const order = {
-      user_id: user?.id ?? null,
-      customer_name: formData.nombre,
-      customer_email: formData.email,
-      customer_phone: formData.telefono,
-      customer_address: formData.direccion,
-      customer_city: formData.ciudad,
-      payment_method: formData.metodo,
-      sinpe_referencia: formData.sinpeReferencia || null,
-      total,
-      items: cart.map((item: any) => ({
-        product_id: item.id,
-        product_name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-        size: item.size || null,
-      })),
-      status: "pendiente_pago",
-    }
-
-    const { error: insertError } = await supabase
-      .from("orders")
-      .insert([order])
-
-    if (insertError) {
+    if (!formData.nombre || !formData.email || !formData.telefono || !formData.direccion || !formData.ciudad) {
       return NextResponse.json(
-        { error: "Error al crear la orden" },
-        { status: 500 }
+        { error: "Todos los campos de envio son obligatorios" },
+        { status: 400 }
       )
     }
 
-    return NextResponse.json({ success: true })
-  } catch (error) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      return NextResponse.json(
+        { error: "Email invalido" },
+        { status: 400 }
+      )
+    }
+
+    if (formData.metodo === "sinpe" && !formData.sinpeReferencia) {
+      return NextResponse.json(
+        { error: "Numero de comprobante SINPE requerido" },
+        { status: 400 }
+      )
+    }
+
+    if (cart.length > 50) {
+      return NextResponse.json(
+        { error: "Demasiados productos en la orden" },
+        { status: 400 }
+      )
+    }
+
+    const deducted: { id: number; stock: number }[] = []
+
+    try {
+      for (const item of cart) {
+        if (!item.id || !item.quantity || item.quantity < 1 || item.quantity > 99) {
+          throw new Error(`Cantidad invalida para ${item.name || "un producto"}`)
+        }
+
+        const { data: product, error: fetchError } = await supabase
+          .from("products")
+          .select("stock")
+          .eq("id", item.id)
+          .single()
+
+        if (fetchError || !product) {
+          throw new Error(`Error al verificar inventario de ${item.name}`)
+        }
+
+        if (product.stock < item.quantity) {
+          throw new Error(`Stock insuficiente para ${item.name}`)
+        }
+
+        const { error: updateError } = await supabase
+          .from("products")
+          .update({ stock: product.stock - item.quantity })
+          .eq("id", item.id)
+
+        if (updateError) {
+          throw new Error(`Error al actualizar stock de ${item.name}`)
+        }
+
+        deducted.push({ id: item.id, stock: product.stock })
+      }
+
+      const order = {
+        user_id: null,
+        customer_name: formData.nombre.trim(),
+        customer_email: formData.email.trim().toLowerCase(),
+        customer_phone: formData.telefono.trim(),
+        customer_address: formData.direccion.trim(),
+        customer_city: formData.ciudad.trim(),
+        payment_method: formData.metodo,
+        sinpe_referencia: formData.sinpeReferencia?.trim() || null,
+        total,
+        items: cart.map((item: any) => ({
+          product_id: item.id,
+          product_name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          size: item.size || null,
+        })),
+        status: "pendiente_pago",
+      }
+
+      const { error: insertError } = await supabase
+        .from("orders")
+        .insert([order])
+
+      if (insertError) {
+        throw new Error("Error al crear la orden")
+      }
+
+      return NextResponse.json({ success: true })
+    } catch (error: any) {
+      for (const d of deducted) {
+        await supabase
+          .from("products")
+          .update({ stock: d.stock })
+          .eq("id", d.id)
+      }
+      throw error
+    }
+  } catch (error: any) {
     console.error("Checkout error:", error)
     return NextResponse.json(
-      { error: "Error al procesar la orden" },
+      { error: error.message || "Error al procesar la orden" },
       { status: 500 }
     )
   }

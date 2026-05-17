@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone()
   const response = NextResponse.next({ request })
 
@@ -14,7 +14,6 @@ export async function proxy(request: NextRequest) {
       url.pathname = "/login"
       return NextResponse.redirect(url)
     }
-
     return response
   }
 

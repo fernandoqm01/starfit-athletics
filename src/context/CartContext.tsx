@@ -50,24 +50,31 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const addToCart = (product: Product) => {
     const available = product.stock ?? 99
 
+    const existing = cart.find(
+      (item) => item.id === product.id && item.size === product.size
+    )
+
+    if (existing && existing.quantity >= available) {
+      notify(`Stock maximo alcanzado para ${product.name}`, "error")
+      return
+    }
+
+    if (available < 1) {
+      notify(`${product.name} esta agotado`, "error")
+      return
+    }
+
     setCart((prev) => {
-      const existing = prev.find(
+      const found = prev.find(
         (item) => item.id === product.id && item.size === product.size
       )
 
-      if (existing) {
-        if (existing.quantity >= available) {
-          return prev
-        }
+      if (found) {
         return prev.map((item) =>
           item.id === product.id && item.size === product.size
             ? { ...item, quantity: item.quantity + 1 }
             : item
         )
-      }
-
-      if (available < 1) {
-        return prev
       }
 
       return [...prev, { ...product, quantity: 1 }]

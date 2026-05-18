@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description: "Equipamiento deportivo disenado para quienes no se rinden. Ropa, calzado, accesorios, equipamiento y suplementos.",
   icons: {
     icon: [
-      { url: "/logo.svg", type: "image/svg+xml" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
     ],
   },
   openGraph: {
